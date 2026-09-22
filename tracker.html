@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Трекер</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F1E7;
+    --surface: #FFFFFF;
+    --line: #DED6C3;
+    --text: #21281F;
+    --text-dim: #6B7264;
+    --accent: #B07E22;
+    --focus: #2F6FA6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181B;
+      --surface: #1C2124;
+      --line: #323A3C;
+      --text: #EDE8DE;
+      --text-dim: #9AA39B;
+      --accent: #D8AE55;
+      --focus: #6FA8DC;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14181B;
+    --surface: #1C2124;
+    --line: #323A3C;
+    --text: #EDE8DE;
+    --text-dim: #9AA39B;
+    --accent: #D8AE55;
+    --focus: #6FA8DC;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Work Sans', system-ui, -apple-system, sans-serif;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+  header {
+    margin-bottom: 28px;
+  }
+  header h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    font-size: 26px;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  header p {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 14px;
+    max-width: 34ch;
+  }
+
+  section {
+    padding: 22px 0;
+    border-top: 1px solid var(--line);
+  }
+  section:first-of-type { border-top: none; padding-top: 0; }
+  section h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 14px;
+  }
+  section .hint {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 6px 0 0;
+  }
+
+  /* catches counter */
+  .counter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .counter-num {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 34px;
+    font-weight: 500;
+  }
+  .tap-btn {
+    padding: 12px 22px;
+    border-radius: 8px;
+    border: none;
+    background: var(--text);
+    color: var(--bg);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .tap-btn:active { transform: translateY(1px); }
+  .tap-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* tips */
+  .tips {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tips li {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .tips li:last-of-type { border-bottom: none; }
+  .tips li::before {
+    content: '';
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 8px;
+  }
+
+  /* week grid */
+  .week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    text-align: center;
+  }
+  .week .col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .week .wd {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .barwrap {
+    height: 60px;
+    display: flex;
+    align-items: flex-end;
+  }
+  .bar {
+    width: 16px;
+    border-radius: 4px 4px 2px 2px;
+    background: var(--line);
+  }
+  .bar.has { background: var(--accent); }
+  .bar.today { outline: 1px solid var(--accent); outline-offset: 2px; }
+  .week .ct {
+    font-size: 11px;
+    color: var(--text-dim);
+    min-height: 14px;
+  }
+
+  footer {
+    margin-top: 30px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Личный трекер</h1>
+  </header>
+
+  <section id="sec-catches">
+    <h2>Поймал себя на пялении сегодня</h2>
+    <div class="counter-row">
+      <div class="counter-num" id="catchesNum">0</div>
+      <button class="tap-btn" onclick="addCatch()">+1, поймал</button>
+    </div>
+    <p class="hint">Не для самобичевания — просто чтобы видеть, снижается ли число со временем.</p>
+
+    <div class="week" id="weekGrid" style="margin-top:20px;"></div>
+    <p class="hint">Счётчик выше — только на сегодня, в полночь обнулится. Столбики ниже — история за неделю, она никуда не девается.</p>
+  </section>
+
+  <section id="sec-tips">
+    <h2>Практика</h2>
+    <ul class="tips">
+      <li>Взгляд — максимум 1–2 секунды, дальше сознательно переводи глаза на что угодно другое. Бороться с тем, что заметил, не нужно — только с задержкой.</li>
+      <li>Называй момент про себя: «окей, залипаю» — это ломает автоматизм лучше, чем попытка не думать об этом.</li>
+      <li>Если ловишь себя на «каталогизации» (запоминаешь лицо, фигуру) — переключай фокус на нейтральную деталь: что несёт, куда идёт.</li>
+      <li>Если поймал себя, что сканируешь помещение — скорее всего, тебе просто скучно или тревожно. Переключись на активную задачу: конспект, вопрос, разговор с соседом.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Данные хранятся локально в этом браузере на этом устройстве.
+  </footer>
+
+</div>
+
+<script>
+  const KEY = 'ru-tracker-v1';
+  const WD = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+  function localDateStr(d = new Date()) {
+    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function defaultData() {
+    return { days: {} };
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return defaultData();
+      const parsed = JSON.parse(raw);
+      if (!parsed.days) parsed.days = {};
+      return parsed;
+    } catch (e) {
+      console.error('load failed', e);
+      return defaultData();
+    }
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch (e) {
+      console.error('save failed', e);
+    }
+  }
+
+  function getDay(dateStr) {
+    if (!state.days[dateStr]) {
+      state.days[dateStr] = { catches: 0 };
+    }
+    return state.days[dateStr];
+  }
+
+  function addCatch() {
+    const key = localDateStr();
+    const rec = getDay(key);
+    rec.catches += 1;
+    save();
+    render();
+  }
+
+  function render() {
+    const todayKey = localDateStr();
+    const todayRec = getDay(todayKey);
+
+    document.getElementById('catchesNum').textContent = todayRec.catches;
+
+    const weekGrid = document.getElementById('weekGrid');
+    weekGrid.innerHTML = '';
+    const now = new Date();
+    const jsDay = now.getDay(); // 0=Sun..6=Sat
+    const mondayOffset = jsDay === 0 ? -6 : 1 - jsDay;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + mondayOffset);
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const key = localDateStr(d);
+      const rec = state.days[key];
+      const catches = rec ? rec.catches : 0;
+      const isToday = key === todayKey;
+      const barHeight = catches === 0 ? 4 : Math.min(8, catches) * 7 + 4;
+      let barClass = 'bar';
+      if (catches > 0) barClass += ' has';
+      if (isToday) barClass += ' today';
+      const col = document.createElement('div');
+      col.className = 'col';
+      col.innerHTML = `
+        <div class="wd">${WD[i]}</div>
+        <div class="barwrap"><div class="${barClass}" style="height:${barHeight}px"></div></div>
+        <div class="ct">${catches || ''}</div>
+      `;
+      weekGrid.appendChild(col);
+    }
+  }
+
+  let state = load();
+  render();
+</script>
+</body>
+</html>

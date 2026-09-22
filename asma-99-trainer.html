@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Асма аль-Хусна — тренажёр запоминания</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0B2027;
+    --bg-soft: #0F2A32;
+    --surface: #143840;
+    --surface-2: #1B454E;
+    --border: #24545F;
+    --ink: #F2ECDD;
+    --ink-dim: #B9CBCB;
+    --ink-faint: #7E9A9A;
+    --gold: #C9A227;
+    --gold-soft: #E4C763;
+    --sage: #6FA895;
+    --amber: #D6A24C;
+    --amber-soft: rgba(214,162,76,.18);
+    --teal-accent: #4E9C8B;
+    --teal-soft: rgba(78,156,139,.18);
+    --gray-soft: rgba(126,154,154,.16);
+    --gold-soft-bg: rgba(201,162,39,.20);
+    --radius: 14px;
+    --radius-sm: 9px;
+    --serif: 'Lora', Georgia, serif;
+    --sans: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: radial-gradient(1200px 600px at 50% -10%, var(--bg-soft), var(--bg) 60%);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    min-height:100vh;
+    padding: 18px 14px 40px;
+  }
+  .wrap{max-width:560px;margin:0 auto;}
+  header.top{margin-bottom:18px;}
+  header.top h1{
+    font-family: var(--serif);
+    font-weight:600;
+    font-style:italic;
+    font-size:26px;
+    margin:0 0 4px;
+    letter-spacing:.2px;
+    color: var(--gold-soft);
+  }
+  header.top p{
+    margin:0;
+    color: var(--ink-dim);
+    font-size:13.5px;
+    line-height:1.5;
+  }
+  .helpbox{
+    margin-top:12px;
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding:12px 14px;
+    font-size:12.8px;
+    color: var(--ink-dim);
+    line-height:1.55;
+  }
+  .helpbox button{
+    background:none;border:none;color:var(--gold-soft);font-size:12.8px;
+    padding:0;cursor:pointer;font-weight:600;font-family:var(--sans);
+  }
+  .helpbox .body{display:none;margin-top:8px;}
+  .helpbox.open .body{display:block;}
+
+  nav.tabs{
+    display:flex;
+    gap:6px;
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: 999px;
+    padding:4px;
+    margin: 18px 0 18px;
+  }
+  nav.tabs button{
+    flex:1;
+    border:none;
+    background:transparent;
+    color: var(--ink-dim);
+    font-family: var(--sans);
+    font-weight:700;
+    font-size:13px;
+    padding:9px 6px;
+    border-radius:999px;
+    cursor:pointer;
+    transition: background .15s, color .15s;
+  }
+  nav.tabs button.active{
+    background: var(--gold);
+    color: #1A1300;
+  }
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .statrow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding:12px 14px;
+    margin-bottom:16px;
+    font-size:13px;
+    color: var(--ink-dim);
+  }
+  .statrow b{color:var(--gold-soft); font-size:15px;}
+
+  .sectitle{
+    font-family: var(--serif);
+    font-style:italic;
+    font-size:16.5px;
+    color: var(--ink);
+    margin: 4px 0 10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .sectitle .count{
+    font-family:var(--sans);
+    font-style:normal;
+    font-weight:700;
+    font-size:12px;
+    background: var(--surface-2);
+    color: var(--sage);
+    padding:3px 9px;
+    border-radius:999px;
+  }
+
+  .card{
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding:20px 18px;
+    margin-bottom:14px;
+  }
+  .card .translit{
+    font-family: var(--serif);
+    font-size:22px;
+    font-weight:600;
+    color: var(--ink);
+  }
+  .card .id-badge{
+    font-size:11px;
+    color: var(--ink-faint);
+    font-weight:700;
+    margin-bottom:6px;
+    letter-spacing:.5px;
+  }
+  .card .gloss{
+    margin-top:10px;
+    font-size:14.5px;
+    color: var(--gold-soft);
+    line-height:1.5;
+    min-height:1.5em;
+  }
+  .card .gloss.hidden{visibility:hidden;}
+  .card .actions{
+    margin-top:16px;
+    display:flex;
+    gap:8px;
+  }
+  .btn{
+    border:none;
+    border-radius: var(--radius-sm);
+    padding:11px 14px;
+    font-family:var(--sans);
+    font-weight:700;
+    font-size:13.5px;
+    cursor:pointer;
+    flex:1;
+    transition: transform .08s ease;
+  }
+  .btn:active{transform: scale(0.97);}
+  .btn-reveal{background: var(--surface-2); color: var(--ink);}
+  .btn-forgot{background: rgba(214,90,70,.18); color:#F3A48F;}
+  .btn-remember{background: var(--sage); color:#0B2027;}
+  .btn-learn{background: var(--gold); color:#1A1300;}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--ink-dim);}
+
+  .progressline{
+    font-size:12px;
+    color: var(--ink-faint);
+    margin-bottom:10px;
+  }
+
+  .empty{
+    text-align:center;
+    padding: 26px 14px;
+    color: var(--ink-dim);
+    font-size:13.5px;
+    line-height:1.6;
+  }
+  .empty .big{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--gold-soft);display:block;margin-bottom:6px;}
+
+  details.namaz{
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding:12px 14px;
+    margin-top: 6px;
+  }
+  details.namaz summary{
+    cursor:pointer;
+    font-weight:700;
+    font-size:13.5px;
+    color: var(--gold-soft);
+    list-style:none;
+  }
+  details.namaz summary::-webkit-details-marker{display:none;}
+  .namaz-list{margin-top:10px;}
+  .namaz-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:7px 0;
+    border-bottom:1px solid var(--border);
+    font-size:13px;
+  }
+  .namaz-row:last-child{border-bottom:none;}
+  .namaz-row .t{color:var(--ink);font-weight:600;min-width:120px;}
+  .namaz-row .g{color:var(--ink-dim);text-align:right;}
+
+  .settings-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding:12px 14px;
+    margin-top:18px;
+    font-size:13px;
+    color: var(--ink-dim);
+  }
+  .settings-row input{
+    width:52px;
+    background: var(--bg);
+    border:1px solid var(--border);
+    color: var(--ink);
+    border-radius:8px;
+    padding:6px 8px;
+    font-family:var(--sans);
+    font-weight:700;
+    text-align:center;
+  }
+
+  .rowlist .item{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:11px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .rowlist .item:last-child{border-bottom:none;}
+  .rowlist .num{
+    font-size:11px;
+    color: var(--ink-faint);
+    font-weight:700;
+    width:22px;
+    padding-top:3px;
+    flex-shrink:0;
+  }
+  .rowlist .main{flex:1; min-width:0;}
+  .rowlist .translit{font-weight:700;font-size:14.5px;color:var(--ink);}
+  .rowlist .gloss-edit{
+    width:100%;
+    background:transparent;
+    border:none;
+    border-bottom:1px dashed var(--border);
+    color: var(--ink-dim);
+    font-family:var(--sans);
+    font-size:12.5px;
+    padding:4px 0;
+    margin-top:3px;
+  }
+  .rowlist .gloss-edit:focus{outline:none;border-bottom-color:var(--gold);}
+  .badge{
+    font-size:10px;
+    font-weight:800;
+    padding:3px 8px;
+    border-radius:999px;
+    white-space:nowrap;
+    margin-top:2px;
+  }
+  .badge.new{background:var(--gray-soft);color:var(--ink-faint);}
+  .badge.learning{background:var(--amber-soft);color:var(--amber);}
+  .badge.review{background:var(--teal-soft);color:var(--teal-accent);}
+  .badge.mastered{background:var(--gold-soft-bg);color:var(--gold-soft);}
+
+  .grid99{
+    display:grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap:5px;
+    margin: 14px 0 4px;
+  }
+  .cell{
+    aspect-ratio:1;
+    border-radius:5px;
+    background: var(--gray-soft);
+  }
+  .cell.learning{background: var(--amber);}
+  .cell.review{background: var(--teal-accent);}
+  .cell.mastered{background: var(--gold);}
+
+  .legend{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    font-size:11.5px;
+    color: var(--ink-dim);
+    margin-top:10px;
+  }
+  .legend span{display:flex;align-items:center;gap:5px;}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .stat-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+  .stat-cards .box{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px;
+  }
+  .stat-cards .box .n{font-family:var(--serif);font-size:26px;font-weight:600;color:var(--gold-soft);}
+  .stat-cards .box .l{font-size:12px;color:var(--ink-dim);margin-top:2px;}
+  footer.note{
+    text-align:center;
+    color: var(--ink-faint);
+    font-size:11.5px;
+    margin-top:26px;
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Асма аль-Хусна</h1>
+    <p>Тренажёр запоминания 99 имён Аллаха — с повторением по нарастающим интервалам, чтобы выученное не забывалось.</p>
+    <div class="helpbox" id="helpbox">
+      <button id="helpToggle">Откуда порядок и переводы? →</button>
+      <div class="body">
+        Порядок и краткие переводы здесь выстроены по тому же списку, что на islam.global — так же пронумерованы 1-99, формулировки близки по смыслу (пересказаны своими словами, а не скопированы дословно). Если где-то формулировка на сайте немного отличается — поправьте её прямо в разделе «Все имена», и приложение запомнит вашу версию. Учтите: единого списка, обязательного для всех, в исламской традиции нет — разные сборники и сайты дают немного разный порядок, это нормально.
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="active" data-tab="today">Сегодня</button>
+    <button data-tab="all">Все имена</button>
+    <button data-tab="progress">Прогресс</button>
+  </nav>
+
+  <!-- TODAY -->
+  <div class="panel active" id="panel-today">
+    <div class="statrow">
+      <span>Серия дней подряд</span>
+      <b id="streakVal">0</b>
+    </div>
+
+    <div id="reviewSection"></div>
+    <div id="newSection"></div>
+
+    <details class="namaz">
+      <summary>📿 Список для намаза (то, что вы уже учите)</summary>
+      <div class="namaz-list" id="namazList"></div>
+    </details>
+
+    <div class="settings-row">
+      <span>Новых имён в день</span>
+      <input type="number" id="newPerDayInput" min="1" max="10" value="3">
+    </div>
+  </div>
+
+  <!-- ALL NAMES -->
+  <div class="panel" id="panel-all">
+    <div class="sectitle">Все 99 имён<span class="count" id="allCount">0 / 99</span></div>
+    <div class="rowlist" id="allList"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="panel" id="panel-progress">
+    <div class="stat-cards">
+      <div class="box"><div class="n" id="statMastered">0</div><div class="l">прочно закреплено</div></div>
+      <div class="box"><div class="n" id="statLearning">0</div><div class="l">в процессе заучивания</div></div>
+    </div>
+    <div class="sectitle">Карта прогресса<span class="count" id="progCount">0 / 99</span></div>
+    <div class="grid99" id="grid99"></div>
+    <div class="legend">
+      <span><i style="background:var(--gray-soft)"></i>ещё не начато</span>
+      <span><i style="background:var(--amber)"></i>изучаю</span>
+      <span><i style="background:var(--teal-accent)"></i>закрепляю</span>
+      <span><i style="background:var(--gold)"></i>прочно знаю</span>
+    </div>
+
+    <details class="namaz" style="margin-top:20px;">
+      <summary>💾 Резервная копия прогресса</summary>
+      <div class="namaz-list">
+        <p style="font-size:12.5px;color:var(--ink-dim);line-height:1.5;margin-top:2px;">Если хотите перенести прогресс на другое устройство или подстраховаться — скопируйте код ниже. Чтобы восстановить, вставьте код в нижнее поле и нажмите «Восстановить».</p>
+        <textarea id="backupOut" readonly style="width:100%;height:70px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--ink-dim);font-size:11px;padding:8px;margin-top:6px;"></textarea>
+        <div class="actions" style="margin-top:8px;">
+          <button class="btn btn-ghost" id="btnCopyBackup">Скопировать</button>
+        </div>
+        <textarea id="backupIn" placeholder="Вставьте сюда код резервной копии" style="width:100%;height:70px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--ink-dim);font-size:11px;padding:8px;margin-top:14px;"></textarea>
+        <div class="actions" style="margin-top:8px;">
+          <button class="btn btn-ghost" id="btnRestore">Восстановить</button>
+        </div>
+        <div class="actions" style="margin-top:14px;">
+          <button class="btn btn-forgot" id="btnReset">Сбросить весь прогресс</button>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <footer class="note">Прогресс сохраняется в этом браузере. Транслитерация и переводы — ознакомительные; при разночтениях со своим источником отредактируйте текст в разделе «Все имена».</footer>
+</div>
+
+<script>
+const NAMES = [
+[1,"Аллах","Бог, единственный, достойный поклонения"],
+[2,"Ар-Рахман","Милостивый ко всем без исключения"],
+[3,"Ар-Рахим","Милосердный к верующим"],
+[4,"Аль-Малик","Властелин всего сущего"],
+[5,"Аль-Куддус","Святой, свободный от недостатков"],
+[6,"Ас-Салям","Дарующий мир"],
+[7,"Аль-Му'мин","Дарующий веру и стабильность"],
+[8,"Аль-Мухаймин","Хранитель верующих"],
+[9,"Аль-Азиз","Могущественный"],
+[10,"Аль-Джаббар","Подчиняющий всё Своей воле"],
+[11,"Аль-Мутакаббир","Превосходящий всех величием"],
+[12,"Аль-Халик","Творец всего сущего"],
+[13,"Аль-Бари","Создатель живого и неживого"],
+[14,"Аль-Мусаввир","Придающий форму и облик"],
+[15,"Аль-Гаффар","Скрывающий и прощающий грехи"],
+[16,"Аль-Каххар","Господствующий над всем"],
+[17,"Аль-Ваххаб","Дарующий без меры"],
+[18,"Ар-Раззак","Наделяющий пропитанием"],
+[19,"Аль-Фаттах","Раскрывающий сердца и пути"],
+[20,"Аль-Алим","Всезнающий"],
+[21,"Аль-Кабид","Уменьшающий блага по Своей воле"],
+[22,"Аль-Баасит","Умножающий награду"],
+[23,"Аль-Хафид","Принижающий недостойных"],
+[24,"Ар-Рафи","Возвышающий достойных"],
+[25,"Аль-Муизз","Возвеличивающий, кого пожелает"],
+[26,"Аль-Муззиль","Лишающий силы, кого пожелает"],
+[27,"Ас-Самиу","Всеслышащий"],
+[28,"Аль-Басыр","Всевидящий"],
+[29,"Аль-Хакам","Справедливый Судья"],
+[30,"Аль-Адль","Справедливый"],
+[31,"Аль-Латиф","Проявляющий тонкое понимание и доброту"],
+[32,"Аль-Хабир","Ведающий явное и скрытое"],
+[33,"Аль-Халим","Сдержанный, не спешащий с наказанием"],
+[34,"Аль-Азыйм","Величайший"],
+[35,"Аль-Гафур","Прощающий грехи"],
+[36,"Аш-Шакур","Щедро вознаграждающий"],
+[37,"Аль-Алий","Всевышний, без равных"],
+[38,"Аль-Кабир","Великий, ни в ком не нуждающийся"],
+[39,"Аль-Хафиз","Хранитель всего сущего"],
+[40,"Аль-Мукит","Поддерживающий пропитанием"],
+[41,"Аль-Хасиб","Самодостаточный"],
+[42,"Аль-Джалиль","Обладающий величием"],
+[43,"Аль-Карим","Щедрый"],
+[44,"Ар-Ракиб","Бдительно наблюдающий"],
+[45,"Аль-Муджиб","Отвечающий на мольбы"],
+[46,"Аль-Васи","Вездесущий"],
+[47,"Аль-Хаким","Мудрый"],
+[48,"Аль-Вадуд","Любящий Свои творения"],
+[49,"Аль-Маджид","Славный, безгранично благородный"],
+[50,"Аль-Баис","Воскрешающий в Судный день"],
+[51,"Аш-Шахид","Свидетель всего происходящего"],
+[52,"Аль-Хакку","Истинный Властелин"],
+[53,"Аль-Вакиль","Тот, на Кого полагаются"],
+[54,"Аль-Кавий","Сильный, не имеющий ограничений"],
+[55,"Аль-Матин","Непоколебимый"],
+[56,"Аль-Вали","Близкий Спутник верующих"],
+[57,"Аль-Хамид","Достойный всякой хвалы"],
+[58,"Аль-Мухси","Ведущий счёт всему"],
+[59,"Аль-Мубди","Основатель, творящий без образца"],
+[60,"Аль-Муид","Возвращающий к жизни после смерти"],
+[61,"Аль-Мухйи","Дарующий жизнь"],
+[62,"Аль-Мумит","Дарующий смерть"],
+[63,"Аль-Хаййи","Обладающий вечной жизнью"],
+[64,"Аль-Мааджид","Наиславнейший, безгранично величественный"],
+[65,"Аль-Каюм","Поддерживающий жизнь во Вселенной"],
+[66,"Аль-Ваджид","Совершающий всё по Своей воле"],
+[67,"Аль-Вахид","Единственный Бог"],
+[68,"Ас-Самад","Самодостаточный"],
+[69,"Аль-Кадир","Могучий, творящий из ничего"],
+[70,"Аль-Муктадир","Устроивший всё наилучшим образом"],
+[71,"Аль-Мукаддим","Продвигающий вперёд"],
+[72,"Аль-Муаххир","Отодвигающий назад"],
+[73,"Аль-Авваль","Не имеющий начала"],
+[74,"Аль-Ахир","Не имеющий конца"],
+[75,"Аз-Захир","Явный, очевидный"],
+[76,"Аль-Батын","Скрытый от взора"],
+[77,"Аль-Валий","Правитель всего сущего"],
+[78,"Аль-Мутаали","Свободный от недостатков"],
+[79,"Аль-Барру","Безгранично добродетельный"],
+[80,"Ат-Таууаб","Принимающий покаяние"],
+[81,"Аль-Мунтакыйм","Карающий непокорных"],
+[82,"Аль-Афуу","Прощающий покаявшихся"],
+[83,"Ар-Рауф","Снисходительный, милующий"],
+[84,"Маликуль-Мульк","Повелитель над повелителями"],
+[85,"Зуль-Джаляли уаль-Икрам","Обладатель Величия и Щедрости"],
+[86,"Аль-Муксит","Принимающий справедливые решения"],
+[87,"Аль-Джами","Объединяющий Своих рабов"],
+[88,"Аль-Гани","Ни в чём не нуждающийся"],
+[89,"Аль-Мугни","Обогащающий, кого пожелает"],
+[90,"Аль-Мани","Ограждающий от благ"],
+[91,"Ад-Дарр","Способный наслать бедствие"],
+[92,"Ан-Нафи","Приносящий пользу"],
+[93,"Ан-Нур","Просветляющий, дарующий свет веры"],
+[94,"Аль-Хади","Направляющий истинным путём"],
+[95,"Аль-Бади","Создающий в прекрасном облике"],
+[96,"Аль-Бакы","Вечный"],
+[97,"Аль-Варис","Наследник всего сущего"],
+[98,"Ар-Рашид","Ведущий верным или заблудшим путём"],
+[99,"Ас-Сабур","Терпеливейший"]
+];
+
+const INTERVALS = [1,2,4,7,14,30,60]; // days
+const STORAGE_KEY = "asma99_progress_v1";
+
+let state = null;
+
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function addDays(dateStr, n){
+  const d = new Date(dateStr+"T00:00:00");
+  d.setDate(d.getDate()+n);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function daysBetween(a,b){
+  return Math.round((new Date(b+"T00:00:00") - new Date(a+"T00:00:00"))/86400000);
+}
+
+function defaultState(){
+  return {
+    newPerDay: 3,
+    cards: {},          // id -> {stage:-1, due:null, mastered:false, customGloss:null}
+    newToday: {date: todayStr(), ids: []},
+    streak: 0,
+    lastActive: null
+  };
+}
+
+let storageAvailable = true;
+
+async function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state = Object.assign(defaultState(), parsed);
+      state.cards = parsed.cards || {};
+      if(!state.newToday || state.newToday.date !== todayStr()){
+        state.newToday = {date: todayStr(), ids: []};
+      }
+    } else {
+      state = defaultState();
+    }
+  }catch(e){
+    storageAvailable = false;
+    state = defaultState();
+  }
+  updateStreak();
+  await saveState();
+  if(!storageAvailable) showStorageWarning();
+}
+
+async function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){
+    storageAvailable = false;
+    showStorageWarning();
+  }
+}
+
+function showStorageWarning(){
+  if(document.getElementById("storageWarn")) return;
+  const w = document.createElement("div");
+  w.id = "storageWarn";
+  w.style.cssText = "background:rgba(214,90,70,.18);color:#F3A48F;border-radius:12px;padding:10px 14px;font-size:12.5px;margin-bottom:14px;line-height:1.5;";
+  w.textContent = "Сохранение недоступно в этом окне — прогресс продержится только до перезагрузки страницы. Откройте файл напрямую в Safari (см. подсказку выше), тогда сохранение будет работать.";
+  document.querySelector(".wrap").insertBefore(w, document.querySelector("nav.tabs"));
+}
+
+function exportBackup(){
+  return JSON.stringify(state);
+}
+function importBackup(text){
+  try{
+    const parsed = JSON.parse(text);
+    state = Object.assign(defaultState(), parsed);
+    state.cards = parsed.cards || {};
+    saveState();
+    renderToday(); renderAllList(); renderProgress();
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+function resetProgress(){
+  state = defaultState();
+  saveState();
+  renderToday(); renderAllList(); renderProgress();
+}
+
+function updateStreak(){
+  const t = todayStr();
+  if(state.lastActive === t) return;
+  if(state.lastActive){
+    const diff = daysBetween(state.lastActive, t);
+    if(diff === 1){ state.streak += 1; }
+    else if(diff > 1){ state.streak = 0; }
+  }
+  // streak count itself increments on first *action* of the day, not just load;
+  // here we just make sure lastActive is tracked, actual +1 happens on first action below.
+}
+
+function markActivityToday(){
+  const t = todayStr();
+  if(state.lastActive === t) return;
+  if(state.lastActive){
+    const diff = daysBetween(state.lastActive, t);
+    state.streak = (diff === 1) ? state.streak + 1 : 1;
+  } else {
+    state.streak = 1;
+  }
+  state.lastActive = t;
+}
+
+function getCard(id){
+  if(!state.cards[id]) state.cards[id] = {stage:-1, due:null, mastered:false, customGloss:null};
+  return state.cards[id];
+}
+function glossFor(entry){
+  const c = state.cards[entry[0]];
+  return (c && c.customGloss) ? c.customGloss : entry[2];
+}
+function statusFor(id){
+  const c = getCard(id);
+  if(c.stage === -1) return "new";
+  if(c.mastered || c.stage >= 5) return "mastered";
+  if(c.stage >= 2) return "review";
+  return "learning";
+}
+
+// ---------- RENDER: TODAY ----------
+let reviewQueue = [];
+let reviewPointer = 0;
+let revealState = false;
+
+function computeQueues(){
+  const t = todayStr();
+  reviewQueue = NAMES
+    .filter(n => { const c = getCard(n[0]); return c.stage >= 0 && c.due && c.due <= t; })
+    .sort((a,b) => (state.cards[a[0]].due).localeCompare(state.cards[b[0]].due));
+  reviewPointer = 0;
+  revealState = false;
+}
+
+function renderToday(){
+  computeQueues();
+  document.getElementById("streakVal").textContent = state.streak;
+  renderReviewSection();
+  renderNewSection();
+  renderNamazList();
+  document.getElementById("newPerDayInput").value = state.newPerDay;
+}
+
+function renderReviewSection(){
+  const el = document.getElementById("reviewSection");
+  el.innerHTML = "";
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `<div class="sectitle">Повторить сегодня<span class="count">${reviewQueue.length}</span></div>`;
+  el.appendChild(wrap);
+
+  if(reviewQueue.length === 0){
+    const e = document.createElement("div");
+    e.className = "empty";
+    e.innerHTML = `<span class="big">Повторять пока нечего</span>Всё, что нужно было повторить сегодня, уже пройдено.`;
+    el.appendChild(e);
+    return;
+  }
+  if(reviewPointer >= reviewQueue.length){
+    const e = document.createElement("div");
+    e.className = "empty";
+    e.innerHTML = `<span class="big">Повторение на сегодня завершено 🌙</span>Хороший темп — так имена и закрепляются.`;
+    el.appendChild(e);
+    return;
+  }
+
+  const entry = reviewQueue[reviewPointer];
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <div class="id-badge">ИМЯ №${entry[0]}</div>
+    <div class="translit">${entry[1]}</div>
+    <div class="gloss ${revealState ? "" : "hidden"}" id="revGloss">${glossFor(entry)}</div>
+    <div class="progressline">${reviewPointer+1} из ${reviewQueue.length}</div>
+    <div class="actions" id="revActions"></div>
+  `;
+  el.appendChild(card);
+
+  const actions = card.querySelector("#revActions");
+  if(!revealState){
+    const btn = document.createElement("button");
+    btn.className = "btn btn-reveal";
+    btn.textContent = "Показать перевод";
+    btn.onclick = () => { revealState = true; renderReviewSection(); };
+    actions.appendChild(btn);
+  } else {
+    const forgot = document.createElement("button");
+    forgot.className = "btn btn-forgot";
+    forgot.textContent = "Забыл";
+    forgot.onclick = () => answerReview(entry[0], false);
+    const remember = document.createElement("button");
+    remember.className = "btn btn-remember";
+    remember.textContent = "Помню";
+    remember.onclick = () => answerReview(entry[0], true);
+    actions.appendChild(forgot);
+    actions.appendChild(remember);
+  }
+}
+
+function answerReview(id, remembered){
+  const c = getCard(id);
+  const t = todayStr();
+  if(remembered){
+    c.stage = Math.min(c.stage + 1, INTERVALS.length - 1);
+    c.due = addDays(t, INTERVALS[c.stage]);
+    if(c.stage >= INTERVALS.length - 1) c.mastered = true;
+  } else {
+    c.stage = 0;
+    c.due = addDays(t, INTERVALS[0]);
+    c.mastered = false;
+  }
+  markActivityToday();
+  saveState();
+  reviewPointer += 1;
+  revealState = false;
+  renderReviewSection();
+  document.getElementById("streakVal").textContent = state.streak;
+  renderNamazList();
+}
+
+function renderNewSection(){
+  const el = document.getElementById("newSection");
+  el.innerHTML = "";
+  const remaining = Math.max(0, state.newPerDay - state.newToday.ids.length);
+  const candidates = NAMES.filter(n => getCard(n[0]).stage === -1).slice(0, remaining);
+
+  const title = document.createElement("div");
+  title.innerHTML = `<div class="sectitle">Новые сегодня<span class="count">${state.newToday.ids.length} / ${state.newPerDay}</span></div>`;
+  el.appendChild(title);
+
+  if(candidates.length === 0 && state.newToday.ids.length >= state.newPerDay){
+    const e = document.createElement("div");
+    e.className = "empty";
+    e.innerHTML = `<span class="big">Дневной лимит новых имён выполнен</span>Остальное — завтра. Это и есть защита от перегрузки.`;
+    el.appendChild(e);
+    return;
+  }
+  if(NAMES.every(n => getCard(n[0]).stage !== -1)){
+    const e = document.createElement("div");
+    e.className = "empty";
+    e.innerHTML = `<span class="big">Все 99 имён уже введены в повторение 🎉</span>Дальше — только закрепление.`;
+    el.appendChild(e);
+    return;
+  }
+
+  candidates.forEach(entry => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="id-badge">ИМЯ №${entry[0]} · НОВОЕ</div>
+      <div class="translit">${entry[1]}</div>
+      <div class="gloss">${glossFor(entry)}</div>
+      <div class="actions"><button class="btn btn-learn">Выучил, добавить в повторение</button></div>
+    `;
+    card.querySelector(".btn-learn").onclick = () => {
+      const c = getCard(entry[0]);
+      const t = todayStr();
+      c.stage = 0;
+      c.due = addDays(t, INTERVALS[0]);
+      state.newToday.ids.push(entry[0]);
+      markActivityToday();
+      saveState();
+      renderToday();
+      renderAllList();
+      renderProgress();
+    };
+    el.appendChild(card);
+  });
+}
+
+function renderNamazList(){
+  const el = document.getElementById("namazList");
+  const started = NAMES.filter(n => getCard(n[0]).stage >= 0);
+  if(started.length === 0){
+    el.innerHTML = `<div class="empty" style="padding:10px 0;">Пока ничего не выучено — начните с раздела «Новые сегодня».</div>`;
+    return;
+  }
+  el.innerHTML = started.map(n => `
+    <div class="namaz-row"><span class="t">${n[0]}. ${n[1]}</span><span class="g">${glossFor(n)}</span></div>
+  `).join("");
+}
+
+// ---------- RENDER: ALL NAMES ----------
+function renderAllList(){
+  const el = document.getElementById("allList");
+  const startedCount = NAMES.filter(n => getCard(n[0]).stage >= 0).length;
+  document.getElementById("allCount").textContent = `${startedCount} / 99`;
+
+  el.innerHTML = NAMES.map(n => {
+    const st = statusFor(n[0]);
+    const label = {new:"новое", learning:"изучаю", review:"закрепляю", mastered:"знаю"}[st];
+    return `
+      <div class="item">
+        <div class="num">${n[0]}</div>
+        <div class="main">
+          <div class="translit">${n[1]}</div>
+          <input class="gloss-edit" data-id="${n[0]}" value="${glossFor(n).replace(/"/g,'&quot;')}">
+        </div>
+        <div class="badge ${st}">${label}</div>
+      </div>
+    `;
+  }).join("");
+
+  el.querySelectorAll(".gloss-edit").forEach(inp => {
+    inp.addEventListener("blur", () => {
+      const id = inp.dataset.id;
+      const c = getCard(id);
+      const original = NAMES.find(n => n[0] == id)[2];
+      c.customGloss = (inp.value.trim() === original) ? null : inp.value.trim();
+      saveState();
+    });
+  });
+}
+
+// ---------- RENDER: PROGRESS ----------
+function renderProgress(){
+  const mastered = NAMES.filter(n => statusFor(n[0]) === "mastered").length;
+  const learning = NAMES.filter(n => { const s = statusFor(n[0]); return s === "learning" || s === "review"; }).length;
+  const started = NAMES.filter(n => getCard(n[0]).stage >= 0).length;
+  document.getElementById("statMastered").textContent = mastered;
+  document.getElementById("statLearning").textContent = learning;
+  document.getElementById("progCount").textContent = `${started} / 99`;
+
+  const grid = document.getElementById("grid99");
+  grid.innerHTML = NAMES.map(n => {
+    const st = statusFor(n[0]);
+    return `<div class="cell ${st === "new" ? "" : st}" title="${n[0]}. ${n[1]}"></div>`;
+  }).join("");
+
+  const backupOut = document.getElementById("backupOut");
+  if(backupOut) backupOut.value = exportBackup();
+}
+
+function wireBackupControls(){
+  const copyBtn = document.getElementById("btnCopyBackup");
+  const restoreBtn = document.getElementById("btnRestore");
+  const resetBtn = document.getElementById("btnReset");
+  if(copyBtn) copyBtn.onclick = () => {
+    const ta = document.getElementById("backupOut");
+    ta.select();
+    document.execCommand("copy");
+    copyBtn.textContent = "Скопировано ✓";
+    setTimeout(() => copyBtn.textContent = "Скопировать", 1500);
+  };
+  if(restoreBtn) restoreBtn.onclick = () => {
+    const text = document.getElementById("backupIn").value.trim();
+    if(!text) return;
+    const ok = importBackup(text);
+    restoreBtn.textContent = ok ? "Восстановлено ✓" : "Не удалось прочитать код";
+    setTimeout(() => restoreBtn.textContent = "Восстановить", 1800);
+  };
+  if(resetBtn) resetBtn.onclick = () => {
+    if(confirm("Точно сбросить весь прогресс? Это нельзя отменить.")) resetProgress();
+  };
+}
+
+// ---------- TABS ----------
+document.querySelectorAll("nav.tabs button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("nav.tabs button").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+    if(btn.dataset.tab === "all") renderAllList();
+    if(btn.dataset.tab === "progress") renderProgress();
+  });
+});
+
+document.getElementById("helpToggle").addEventListener("click", () => {
+  document.getElementById("helpbox").classList.toggle("open");
+});
+
+document.getElementById("newPerDayInput").addEventListener("change", (e) => {
+  let v = parseInt(e.target.value, 10);
+  if(isNaN(v) || v < 1) v = 1;
+  if(v > 10) v = 10;
+  state.newPerDay = v;
+  saveState();
+  renderToday();
+});
+
+// ---------- INIT ----------
+(async function init(){
+  await loadState();
+  renderToday();
+  renderAllList();
+  renderProgress();
+  wireBackupControls();
+})();
+</script>
+</body>
+</html>

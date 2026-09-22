@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Приоритеты дня</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #12171D;
+    --surface: #1B222A;
+    --surface-2: #222A33;
+    --text: #E8EBEE;
+    --muted: #7D8894;
+    --amber: #C9A876;
+    --sage: #6E9C97;
+    --brick: #3F6864;
+    --line: #29323C;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: light){ :root{ } }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+  }
+  .wrap{ max-width: 460px; margin: 0 auto; padding: 20px 16px 56px; }
+  .topbar{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:18px; }
+  .topbar h1{ font-size: 20px; font-weight:700; margin:0; letter-spacing:-0.01em; }
+  .topbar .date{ font-size:13px; color:var(--muted); }
+  .streak{ font-size:12px; color:var(--sage); margin-top:2px; }
+
+  .hero{
+    width:100%; border:none; border-radius: 20px;
+    background: linear-gradient(160deg, var(--brick), #24413E);
+    color:#fff; padding:18px 20px; text-align:left; cursor:pointer;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom:22px;
+  }
+  .hero:active{ transform: scale(0.98); }
+  .hero .htitle{ font-size:17px; font-weight:600; }
+  .hero .hsub{ font-size:12.5px; opacity:0.85; margin-top:3px; }
+  .hero .harrow{ font-size:22px; opacity:0.9; }
+
+  .stack{ display:flex; flex-direction:column; gap:10px; margin-bottom:22px; }
+  .band{ background:var(--surface); border-radius: var(--radius); border:1px solid var(--line); overflow:hidden; }
+  .band-head{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; cursor:pointer; user-select:none; }
+  .band-1 .band-head{ padding-top:18px; padding-bottom:18px; }
+  .band-2 .band-head{ padding-top:15px; padding-bottom:15px; }
+  .band-3 .band-head{ padding-top:12px; padding-bottom:12px; }
+  .band-4 .band-head{ padding-top:9px; padding-bottom:9px; }
+  .band-num{ font-family:'Space Mono', monospace; font-size:12px; color:var(--muted); width:20px; }
+  .band-name{ font-size:15px; font-weight:600; flex:1; margin-left:10px; }
+  .band-1 .band-name{ font-size:17px; }
+  .band-4 .band-name{ font-size:14px; color:var(--muted); font-weight:500; }
+  .band-check{ width:24px; height:24px; border-radius:7px; border:1.5px solid var(--line); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .band-check.done{ background:var(--sage); border-color:var(--sage); }
+  .band-check.done::after{ content:'✓'; font-size:14px; color:#0d1210; }
+  .chev{ color:var(--muted); font-size:13px; margin-left:8px; transition: transform 0.2s; }
+  .band.open .chev{ transform: rotate(90deg); }
+  .band-body{ display:none; padding:0 16px 16px; border-top:1px solid var(--line); }
+  .band.open .band-body{ display:block; padding-top:12px; }
+
+  label.small{ display:block; font-size:12px; color:var(--muted); margin-bottom:6px; }
+  input[type=text], textarea, input[type=date]{
+    width:100%; background:var(--surface-2); border:1px solid var(--line); border-radius:10px;
+    color:var(--text); font-family:inherit; font-size:14.5px; padding:10px 12px; margin-bottom:10px;
+    -webkit-appearance:none;
+  }
+  textarea{ min-height:64px; resize:vertical; }
+  .row-check{ display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:14px; }
+  .row-check .box{ width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line); flex-shrink:0; }
+  .row-check .box.done{ background:var(--sage); border-color:var(--sage); }
+  .row-check .box.done::after{ content:'✓'; font-size:12px; color:#0d1210; display:block; text-align:center; line-height:20px; }
+  .hint{ font-size:12px; color:var(--muted); line-height:1.5; margin-top:2px; }
+
+  .card{ background:var(--surface); border-radius:var(--radius); border:1px solid var(--line); padding:16px; margin-bottom:14px; }
+  .card h2{ font-size:14px; font-weight:600; margin:0 0 12px; }
+  .pdd-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .pdd-count{ font-family:'Space Mono', monospace; font-size:28px; font-weight:700; color:var(--amber); line-height:1; }
+  .pdd-label{ font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .week-chips{ display:flex; gap:6px; margin-top:12px; }
+  .chip{ flex:1; height:34px; border-radius:8px; border:1.5px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--muted); cursor:pointer; }
+  .chip.on{ background:var(--amber); border-color:var(--amber); color:#1a1200; font-weight:700; }
+
+  .slider-row{ margin-top:4px; }
+  input[type=range]{ width:100%; }
+  .slider-val{ font-family:'Space Mono', monospace; font-size:22px; color:var(--amber); text-align:center; margin-bottom:2px; }
+
+  .chart{ display:flex; align-items:flex-end; gap:4px; height:70px; margin-top:6px; }
+  .barcol{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+  .bar{ width:100%; border-radius:3px 3px 0 0; background:var(--sage); min-height:2px; }
+  .bar.empty{ background:var(--line); }
+
+  .footer-note{ font-size:12px; color:var(--muted); line-height:1.6; padding:6px 4px 0; }
+
+  /* overlay */
+  .overlay{ position:fixed; inset:0; background:rgba(10,11,13,0.96); display:none; align-items:center; justify-content:center; flex-direction:column; padding:24px; z-index:50; }
+  .overlay.open{ display:flex; }
+  .breath-circle{ width:150px; height:150px; border-radius:50%; background: radial-gradient(circle at 35% 30%, #8FBBB6, var(--brick)); transform:scale(1); transition: transform 4s ease-in-out; margin-bottom:26px; }
+  .breath-circle.grow{ transform:scale(1.35); }
+  .breath-circle.shrink{ transform:scale(0.8); }
+  @media (prefers-reduced-motion: reduce){ .breath-circle{ transition: transform 0.05s linear; } }
+  .breath-phase{ font-size:19px; font-weight:600; margin-bottom:4px; }
+  .breath-timer{ font-family:'Space Mono', monospace; font-size:34px; color:var(--amber); margin-bottom:18px; }
+  .breath-cycle{ font-size:12px; color:var(--muted); margin-bottom:30px; }
+  .breath-reframe{ font-size:16px; text-align:center; line-height:1.5; max-width:320px; margin-bottom:26px; display:none; }
+  .btnrow{ display:flex; gap:10px; }
+  button.pill{ font-family:inherit; font-size:14px; font-weight:600; padding:12px 20px; border-radius:24px; border:1.5px solid var(--line); background:var(--surface); color:var(--text); cursor:pointer; }
+  button.pill.primary{ background:var(--amber); border-color:var(--amber); color:#1a1200; }
+  button.pill.ghost{ background:transparent; color:var(--muted); border-color:transparent; }
+  .close-x{ position:absolute; top:22px; right:20px; color:var(--muted); font-size:15px; background:none; border:none; }
+
+  :focus-visible{ outline: 2px solid var(--amber); outline-offset:2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div>
+      <h1>Приоритеты дня</h1>
+      <div class="streak" id="streakLine"></div>
+    </div>
+    <div class="date" id="dateLine"></div>
+  </div>
+
+  <button class="hero" id="sosBtn">
+    <div>
+      <div class="htitle">Тревога сейчас</div>
+      <div class="hsub">60 секунд, чтобы вернуть контроль</div>
+    </div>
+    <div class="harrow">›</div>
+  </button>
+
+  <div class="stack">
+
+    <div class="band band-1" data-band="business">
+      <div class="band-head">
+        <span class="band-num">1</span>
+        <span class="band-name">Бизнес</span>
+        <span class="band-check" id="check-business"></span>
+        <span class="chev">›</span>
+      </div>
+      <div class="band-body">
+        <label class="small" for="businessStep">Один шаг сегодня</label>
+        <input type="text" id="businessStep" placeholder="Например: ответить поставщику по Tradelle">
+        <div class="row-check" id="rowBusinessDone"><span class="box" id="boxBusinessDone"></span><span>Шаг сделан</span></div>
+      </div>
+    </div>
+
+    <div class="band band-2" data-band="discipline">
+      <div class="band-head">
+        <span class="band-num">2</span>
+        <span class="band-name">Дисциплина / саморазвитие</span>
+        <span class="band-check" id="check-discipline"></span>
+        <span class="chev">›</span>
+      </div>
+      <div class="band-body">
+        <div class="row-check" id="rowDisciplineDone"><span class="box" id="boxDisciplineDone"></span><span>Вечерний ритуал (чтение + дневник)</span></div>
+        <div class="hint">Протокол старта: если не идёт — открой файл на 2 минуты, без требований к качеству.</div>
+      </div>
+    </div>
+
+    <div class="band band-3" data-band="family">
+      <div class="band-head">
+        <span class="band-num">3</span>
+        <span class="band-name">Семья</span>
+        <span class="band-check" id="check-family" style="visibility:hidden"></span>
+        <span class="chev">›</span>
+      </div>
+      <div class="band-body">
+        <label class="small" for="familyNotes">Свои формулировки на случай недовольства отца — заполни как удобно тебе</label>
+        <textarea id="familyNotes" placeholder="Место для своих заметок"></textarea>
+      </div>
+    </div>
+
+    <div class="band band-4" data-band="study">
+      <div class="band-head">
+        <span class="band-num">4</span>
+        <span class="band-name">Учёба</span>
+        <span class="band-check" id="check-study" style="visibility:hidden"></span>
+        <span class="chev">›</span>
+      </div>
+      <div class="band-body">
+        <div class="row-check" id="rowStudyFlag"><span class="box" id="boxStudyFlag"></span><span>Сегодня есть дедлайн/контрольная</span></div>
+        <input type="text" id="studyNote" placeholder="Что именно (необязательно)">
+        <div class="hint">Пункт четвёртый в списке — здесь ты просто проходишь мимо.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <h2>ПДД</h2>
+    <div class="pdd-row">
+      <div>
+        <div class="pdd-count" id="pddCount">—</div>
+        <div class="pdd-label">дней до экзамена</div>
+      </div>
+      <div style="flex:1; max-width:170px;">
+        <label class="small" for="pddDate">Дата экзамена</label>
+        <input type="date" id="pddDate">
+      </div>
+    </div>
+    <div class="hint" style="margin-top:10px;">Занимался ПДД сегодня?</div>
+    <div class="week-chips" id="weekChips"></div>
+    <div class="hint" id="weekCountLine" style="margin-top:8px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>Тревога сегодня</h2>
+    <div class="slider-row">
+      <div class="slider-val" id="anxietyVal">—</div>
+      <input type="range" min="0" max="10" step="1" id="anxietySlider">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Последние 14 дней</h2>
+    <div class="chart" id="chart"></div>
+  </div>
+
+  <div class="footer-note">
+    Расписание вуза пока плавает — как только оно устоится, эти протоколы можно закрепить конкретным временем в календаре. До этого держи их здесь и открывай прямо в момент дороги/ожидания.
+  </div>
+
+</div>
+
+<div class="overlay" id="overlay">
+  <button class="close-x" id="closeOverlay">Закрыть</button>
+  <div class="breath-circle" id="breathCircle"></div>
+  <div class="breath-phase" id="breathPhase">Вдох</div>
+  <div class="breath-timer" id="breathTimer">4</div>
+  <div class="breath-cycle" id="breathCycleLine">Цикл 1 из 4</div>
+  <div class="breath-reframe" id="breathReframe"></div>
+  <div class="btnrow" id="breathButtons" style="display:none;">
+    <button class="pill ghost" id="btnDone">Готово</button>
+    <button class="pill primary" id="btnAgain">Ещё цикл</button>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  var DEFAULT_REFRAMES = [
+    "Пара — это 3 часа моего времени, а не вся жизнь.",
+    "Учёба четвёртая в списке. Здесь я просто прохожу мимо.",
+    "На ошибки есть запас — два года.",
+    "Тревога сейчас не равна опасности сейчас.",
+    "Бизнес растёт и без меня рядом — я просто не смотрю на него 3 часа.",
+    "Отец видит расписание на сегодня. Он не видит план на два года."
+  ];
+
+  var settings = { pddDate: "", reframes: DEFAULT_REFRAMES.slice(), familyNotes: "" };
+  var history = {};
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function keyForDate(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function todayKey(){ return keyForDate(new Date()); }
+  function addDays(d, n){ var r = new Date(d); r.setDate(r.getDate()+n); return r; }
+
+  function emptyEntry(){
+    return { businessStep:"", businessDone:false, disciplineDone:false, studyFlag:false, studyNote:"", pddPractice:false, anxiety:null };
+  }
+  function getEntry(k){ if(!history[k]) history[k] = emptyEntry(); return history[k]; }
+
+  async function loadAll(){
+    try{
+      var s = await window.storage.get('settings');
+      if(s && s.value){ var parsed = JSON.parse(s.value); settings = Object.assign(settings, parsed); }
+    }catch(e){}
+    try{
+      var h = await window.storage.get('history');
+      if(h && h.value){ history = JSON.parse(h.value); }
+    }catch(e){}
+    render();
+  }
+  async function saveSettings(){ try{ await window.storage.set('settings', JSON.stringify(settings)); }catch(e){} }
+  async function saveHistory(){ try{ await window.storage.set('history', JSON.stringify(history)); }catch(e){} }
+
+  function fmtDateLine(){
+    var d = new Date();
+    var opts = { day:'numeric', month:'long', weekday:'long' };
+    document.getElementById('dateLine').textContent = d.toLocaleDateString('ru-RU', opts);
+  }
+
+  function computeStreak(){
+    var streak = 0; var d = new Date();
+    while(true){
+      var k = keyForDate(d);
+      var e = history[k];
+      if(e && e.businessDone){ streak++; d = addDays(d,-1); } else { break; }
+    }
+    return streak;
+  }
+
+  function render(){
+    fmtDateLine();
+    var tk = todayKey();
+    var e = getEntry(tk);
+
+    document.getElementById('businessStep').value = e.businessStep || "";
+    document.getElementById('familyNotes').value = settings.familyNotes || "";
+    document.getElementById('studyNote').value = e.studyNote || "";
+    document.getElementById('pddDate').value = settings.pddDate || "";
+
+    setCheck('boxBusinessDone', e.businessDone);
+    setCheck('boxDisciplineDone', e.disciplineDone);
+    setCheck('boxStudyFlag', e.studyFlag);
+    setBandCheck('check-business', e.businessDone);
+    setBandCheck('check-discipline', e.disciplineDone);
+
+    var streak = computeStreak();
+    document.getElementById('streakLine').textContent = streak > 0 ? ("бизнес-шаг подряд: " + streak + " " + dayWord(streak)) : "";
+
+    renderPdd();
+    renderWeekChips();
+    renderAnxiety(e);
+    renderChart();
+  }
+
+  function dayWord(n){
+    var n10 = n % 10, n100 = n % 100;
+    if(n100 >= 11 && n100 <= 14) return "дней";
+    if(n10 === 1) return "день";
+    if(n10 >=2 && n10 <=4) return "дня";
+    return "дней";
+  }
+
+  function setCheck(id, val){
+    var el = document.getElementById(id);
+    if(val) el.classList.add('done'); else el.classList.remove('done');
+  }
+  function setBandCheck(id, val){
+    var el = document.getElementById(id);
+    if(val) el.classList.add('done'); else el.classList.remove('done');
+  }
+
+  function renderPdd(){
+    var countEl = document.getElementById('pddCount');
+    if(!settings.pddDate){ countEl.textContent = "—"; return; }
+    var target = new Date(settings.pddDate + "T00:00:00");
+    var now = new Date(); now.setHours(0,0,0,0);
+    var diff = Math.round((target - now) / 86400000);
+    countEl.textContent = diff >= 0 ? diff : "прошло";
+  }
+
+  function renderWeekChips(){
+    var wrap = document.getElementById('weekChips');
+    wrap.innerHTML = "";
+    var labels = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+    var today = new Date();
+    var weekday = (today.getDay() + 6) % 7; // 0=Mon
+    var monday = addDays(today, -weekday);
+    var practiced = 0;
+    for(var i=0;i<7;i++){
+      var d = addDays(monday, i);
+      var k = keyForDate(d);
+      var isFuture = d > today;
+      var on = history[k] && history[k].pddPractice;
+      if(on) practiced++;
+      var chip = document.createElement('div');
+      chip.className = 'chip' + (on ? ' on' : '');
+      chip.textContent = labels[i];
+      chip.style.opacity = isFuture ? 0.35 : 1;
+      if(!isFuture){
+        chip.addEventListener('click', function(kk){
+          return function(){
+            var ent = getEntry(kk);
+            ent.pddPractice = !ent.pddPractice;
+            saveHistory();
+            render();
+          };
+        }(k));
+      }
+      wrap.appendChild(chip);
+    }
+    document.getElementById('weekCountLine').textContent = practiced + " из 7 дней на этой неделе";
+  }
+
+  function renderAnxiety(e){
+    var slider = document.getElementById('anxietySlider');
+    var val = document.getElementById('anxietyVal');
+    slider.value = (e.anxiety === null || e.anxiety === undefined) ? 0 : e.anxiety;
+    val.textContent = (e.anxiety === null || e.anxiety === undefined) ? "—" : e.anxiety;
+  }
+
+  function renderChart(){
+    var chart = document.getElementById('chart');
+    chart.innerHTML = "";
+    var today = new Date();
+    for(var i=13;i>=0;i--){
+      var d = addDays(today, -i);
+      var k = keyForDate(d);
+      var e = history[k];
+      var col = document.createElement('div');
+      col.className = 'barcol';
+      var bar = document.createElement('div');
+      if(e && e.anxiety !== null && e.anxiety !== undefined){
+        bar.className = 'bar';
+        bar.style.height = Math.max(4, e.anxiety*6) + 'px';
+      } else {
+        bar.className = 'bar empty';
+        bar.style.height = '2px';
+      }
+      col.appendChild(bar);
+      chart.appendChild(col);
+    }
+  }
+
+  // band toggle
+  document.querySelectorAll('.band-head').forEach(function(head){
+    head.addEventListener('click', function(){
+      head.parentElement.classList.toggle('open');
+    });
+  });
+
+  // business
+  document.getElementById('businessStep').addEventListener('input', function(){
+    var e = getEntry(todayKey());
+    e.businessStep = this.value;
+    saveHistory();
+  });
+  document.getElementById('rowBusinessDone').addEventListener('click', function(){
+    var e = getEntry(todayKey());
+    e.businessDone = !e.businessDone;
+    saveHistory(); render();
+  });
+  document.getElementById('rowDisciplineDone').addEventListener('click', function(){
+    var e = getEntry(todayKey());
+    e.disciplineDone = !e.disciplineDone;
+    saveHistory(); render();
+  });
+  document.getElementById('rowStudyFlag').addEventListener('click', function(){
+    var e = getEntry(todayKey());
+    e.studyFlag = !e.studyFlag;
+    saveHistory(); render();
+  });
+  document.getElementById('studyNote').addEventListener('input', function(){
+    var e = getEntry(todayKey());
+    e.studyNote = this.value;
+    saveHistory();
+  });
+  document.getElementById('familyNotes').addEventListener('input', function(){
+    settings.familyNotes = this.value;
+    saveSettings();
+  });
+  document.getElementById('pddDate').addEventListener('change', function(){
+    settings.pddDate = this.value;
+    saveSettings(); renderPdd();
+  });
+  document.getElementById('anxietySlider').addEventListener('input', function(){
+    document.getElementById('anxietyVal').textContent = this.value;
+  });
+  document.getElementById('anxietySlider').addEventListener('change', function(){
+    var e = getEntry(todayKey());
+    e.anxiety = parseInt(this.value,10);
+    saveHistory(); renderChart();
+  });
+
+  // breathing overlay
+  var overlay = document.getElementById('overlay');
+  var circle = document.getElementById('breathCircle');
+  var phaseEl = document.getElementById('breathPhase');
+  var timerEl = document.getElementById('breathTimer');
+  var cycleLine = document.getElementById('breathCycleLine');
+  var reframeEl = document.getElementById('breathReframe');
+  var buttonsEl = document.getElementById('breathButtons');
+
+  var phases = [
+    {label:'Вдох', dur:4, cls:'grow'},
+    {label:'Задержка', dur:4, cls:'grow'},
+    {label:'Выдох', dur:4, cls:'shrink'},
+    {label:'Задержка', dur:4, cls:'shrink'}
+  ];
+  var running = false;
+  var timerHandle = null;
+
+  function stopTimers(){ if(timerHandle){ clearInterval(timerHandle); timerHandle = null; } }
+
+  function runCycle(cycleIndex){
+    if(!running) return;
+    if(cycleIndex >= 4){
+      finishCycles();
+      return;
+    }
+    runPhase(0, cycleIndex);
+  }
+
+  function runPhase(phaseIndex, cycleIndex){
+    if(!running) return;
+    if(phaseIndex >= phases.length){
+      runCycle(cycleIndex+1);
+      return;
+    }
+    var phase = phases[phaseIndex];
+    phaseEl.textContent = phase.label;
+    cycleLine.textContent = "Цикл " + (cycleIndex+1) + " из 4";
+    circle.className = 'breath-circle ' + phase.cls;
+    var remaining = phase.dur;
+    timerEl.textContent = remaining;
+    stopTimers();
+    timerHandle = setInterval(function(){
+      remaining--;
+      if(remaining <= 0){
+        stopTimers();
+        runPhase(phaseIndex+1, cycleIndex);
+      } else {
+        timerEl.textContent = remaining;
+      }
+    }, 1000);
+  }
+
+  function finishCycles(){
+    phaseEl.textContent = "";
+    timerEl.textContent = "";
+    cycleLine.textContent = "";
+    reframeEl.style.display = 'block';
+    buttonsEl.style.display = 'flex';
+    var list = settings.reframes && settings.reframes.length ? settings.reframes : DEFAULT_REFRAMES;
+    reframeEl.textContent = list[Math.floor(Math.random()*list.length)];
+  }
+
+  function openOverlay(){
+    overlay.classList.add('open');
+    running = true;
+    reframeEl.style.display = 'none';
+    buttonsEl.style.display = 'none';
+    circle.className = 'breath-circle';
+    runCycle(0);
+  }
+  function closeOverlay(){
+    running = false;
+    stopTimers();
+    overlay.classList.remove('open');
+  }
+
+  document.getElementById('sosBtn').addEventListener('click', openOverlay);
+  document.getElementById('closeOverlay').addEventListener('click', closeOverlay);
+  document.getElementById('btnDone').addEventListener('click', closeOverlay);
+  document.getElementById('btnAgain').addEventListener('click', function(){
+    reframeEl.style.display = 'none';
+    buttonsEl.style.display = 'none';
+    running = true;
+    runCycle(0);
+  });
+
+  loadAll();
+})();
+</script>
+</body>
+</html>
