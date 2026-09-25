@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Встать">
 <meta name="theme-color" content="#1B1714">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Vstat%22%2C%22short_name%22%3A%22Vstat%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231B1714%22%2C%22theme_color%22%3A%22%231B1714%22%7D">
 <style>
   :root{
     --bg:#1B1714;
@@ -53,6 +54,13 @@
     line-height:1.2;
   }
   .streak.on{color:var(--accent);}
+  .storage-warn{
+    font-size:12px;
+    color:var(--cool);
+    max-width:280px;
+    line-height:1.4;
+    margin-top:8px;
+  }
   main{
     flex:1;
     display:flex;
@@ -192,9 +200,10 @@
 <body>
   <div class="app">
     <div class="streak" id="streakPill">Серия начнётся сегодня</div>
+    <div class="storage-warn" id="storageWarn" hidden>Браузер не даёт сохранять данные (приватный режим?) — серия не запомнится между открытиями.</div>
 
     <main>
-      <p class="hint" id="hint">Выбери, что делаешь дальше, и досчитай до конца — на «1» встаёшь.</p>
+      <p class="hint" id="hint">Выбери, что делаешь дальше, и досчитай до нуля — на нуле встаёшь.</p>
 
       <div class="chips" id="chips">
         <button class="chip" data-task="Читать">Читать</button>
@@ -239,6 +248,17 @@
   var chipsWrap = document.getElementById('chips');
   var customInput = document.getElementById('customInput');
   var chipCustomBtn = document.getElementById('chipCustomBtn');
+  var storageWarn = document.getElementById('storageWarn');
+
+  var storageOK = true;
+  try{
+    var __t = '__vstat_test__';
+    localStorage.setItem(__t, '1');
+    localStorage.removeItem(__t);
+  }catch(e){
+    storageOK = false;
+  }
+  if (!storageOK) storageWarn.hidden = false;
 
   ring.style.strokeDasharray = CIRC;
   ring.style.strokeDashoffset = 0;
@@ -346,7 +366,7 @@
     feedback.textContent = '';
     hint.textContent = selectedTask
       ? 'Встаём: ' + selectedTask
-      : 'Встаём. На «1» — подъём.';
+      : 'Встаём. На нуле — подъём.';
     taskLabel.textContent = '';
     ring.classList.remove('done');
     setRingOffset(0);
@@ -361,8 +381,11 @@
     setRingOffset(2/3);
     if (navigator.vibrate) { try{ navigator.vibrate([30,40,60]); }catch(e){} }
     await delay(1000);
+    setDigit(0);
     setRingOffset(1);
     ring.classList.add('done');
+    if (navigator.vibrate) { try{ navigator.vibrate(80); }catch(e){} }
+    await delay(450);
     showZeroState();
   }
 
@@ -397,7 +420,7 @@
 
   function resetToIdle(){
     state = 'idle';
-    hint.textContent = 'Выбери, что делаешь дальше, и досчитай до конца — на «1» встаёшь.';
+    hint.textContent = 'Выбери, что делаешь дальше, и досчитай до нуля — на нуле встаёшь.';
     feedback.textContent = '';
     taskLabel.textContent = '';
     primaryBtn.hidden = false;
@@ -424,3 +447,4 @@
 </script>
 </body>
 </html>
+
