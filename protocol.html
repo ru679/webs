@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Протокол дня</title>
+<style>
+  :root{
+    --bg:#14171c; --surface:#1c2028; --surface2:#20242c;
+    --text:#edeef0; --muted:#8b93a1; --line:#2a2f38;
+    --amber:#e8a33d; --brick:#c9564a; --green:#5fae82;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    line-height:1.45}
+  .wrap{max-width:520px;margin:0 auto;padding:20px 18px 60px}
+  h1{font-size:22px;font-weight:650;margin:0 0 2px}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 22px}
+  section{margin-bottom:26px}
+  h2{font-size:13px;font-weight:650;color:var(--muted);
+     letter-spacing:.01em;margin:0 0 10px}
+  .card{background:var(--surface);border:1px solid var(--line);
+    border-radius:10px;padding:14px 16px}
+  .countdown{display:flex;align-items:baseline;gap:10px}
+  .countdown .num{font-size:38px;font-weight:700;color:var(--amber);
+    font-variant-numeric:tabular-nums}
+  .countdown .lbl{color:var(--muted);font-size:14px}
+  .note{font-size:12.5px;color:var(--muted);margin-top:6px}
+  ol.pri{list-style:none;margin:0;padding:0}
+  ol.pri li{display:flex;gap:10px;padding:8px 0;
+    border-bottom:1px solid var(--line);font-size:14.5px}
+  ol.pri li:last-child{border-bottom:none}
+  ol.pri .n{color:var(--amber);font-weight:650;min-width:16px;
+    font-variant-numeric:tabular-nums}
+  .step{display:flex;gap:12px;align-items:flex-start;padding:10px 0;
+    border-bottom:1px solid var(--line);cursor:pointer}
+  .step:last-child{border-bottom:none}
+  .box{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--muted);
+    flex:none;margin-top:1px;display:flex;align-items:center;justify-content:center}
+  .step.done .box{background:var(--green);border-color:var(--green)}
+  .step.done .box:after{content:"✓";color:#0d0f12;font-size:13px;font-weight:700}
+  .step.done .txt{color:var(--muted);text-decoration:line-through}
+  .txt{font-size:14.5px}
+  .row{display:flex;gap:8px;align-items:center}
+  button{background:var(--surface2);color:var(--text);border:1px solid var(--line);
+    border-radius:8px;padding:9px 14px;font-size:14px;cursor:pointer}
+  button.primary{background:var(--amber);color:#1c1305;border:none;font-weight:650}
+  button:active{transform:scale(.97)}
+  input[type=number]{width:64px;background:var(--surface2);color:var(--text);
+    border:1px solid var(--line);border-radius:8px;padding:9px;font-size:14px;text-align:center}
+  .tally{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+  .tally .num{font-size:26px;font-weight:700}
+  .tally .lbl{color:var(--muted);font-size:13px}
+  textarea{width:100%;min-height:70px;background:var(--surface2);color:var(--text);
+    border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;
+    font-family:inherit;resize:vertical}
+  .hist{margin-top:14px}
+  .hist .item{padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .hist .item:last-child{border-bottom:none}
+  .hist .d{color:var(--amber);font-weight:650;margin-right:6px}
+  .hist .m{color:var(--muted)}
+  .empty{color:var(--muted);font-size:13px;padding:4px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Протокол дня</h1>
+  <p class="sub" id="today"></p>
+  <p class="sub" id="streak"></p>
+
+  <section>
+    <h2>До экзаменов</h2>
+    <div class="card" style="display:flex;gap:28px">
+      <div class="countdown" style="flex-direction:column;align-items:flex-start;gap:2px">
+        <span class="num" id="cd-internal">—</span>
+        <span class="lbl">внутренний, 1 окт</span>
+      </div>
+      <div class="countdown" style="flex-direction:column;align-items:flex-start;gap:2px">
+        <span class="num" id="cd-days">—</span>
+        <span class="lbl">ГИБДД, 6 окт</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Приоритет на сейчас</h2>
+    <div class="card">
+      <ol class="pri">
+        <li><span class="n">1</span><span>ПДД — билеты и вождение</span></li>
+        <li><span class="n">2</span><span>КТ — не завалить, не идеал</span></li>
+        <li><span class="n">3</span><span>Дом / брат — по ситуации, выше учёбы</span></li>
+        <li><span class="n">4</span><span>Clavelio — маленький шаг каждый день</span></li>
+        <li><span class="n">5</span><span>Шахматы / Brilliant / Duolingo — только как перерыв</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>По приходе домой <span id="step-progress" style="color:var(--muted);font-weight:400"></span></h2>
+    <div class="card" id="steps"></div>
+  </section>
+
+  <section>
+    <h2>Билеты ПДД сегодня</h2>
+    <div class="card">
+      <div class="tally"><span class="num" id="t-count">0</span><span class="lbl">решено сегодня</span></div>
+      <div class="row" style="margin-bottom:8px">
+        <button onclick="addN(5)">+5</button>
+        <button onclick="addN(10)">+10</button>
+        <button onclick="addN(20)">+20</button>
+      </div>
+      <div class="row">
+        <input type="number" id="t-input" min="1" value="10">
+        <button class="primary" onclick="addTickets()">Добавить</button>
+        <button onclick="resetTickets()">Сброс</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Итог дня</h2>
+    <div class="card">
+      <textarea id="note" placeholder="Что сделано, что на завтра..."></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="primary" onclick="saveNote()">Сохранить</button>
+      </div>
+      <div class="hist" id="history"></div>
+    </div>
+  </section>
+  <p style="text-align:center;margin-top:10px">
+    <button onclick="resetAll()" style="background:none;border:none;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer">Очистить все данные</button>
+  </p>
+</div>
+
+<script>
+const STEPS = [
+  "Еда + 15 мин отдых (1 партия шахмат, 10 мин с таймером — не больше)",
+  "3 мин — записать 3 пункта на сегодня: ПДД → самое горящее → шаг по Clavelio",
+  "Билеты ПДД — 30-40 мин",
+  "Домашка / КТ — до уровня «не завалю»",
+  "Перерыв 10 мин — шахматы / Brilliant с таймером",
+  "Clavelio — 20-30 мин, один конкретный шаг",
+  "Если осталось время — чтение / итальянский 15-20 мин",
+  "Записать что сделано и что на завтра"
+];
+const INTERNAL_DATE = new Date(2026, 9, 1); // 1 окт 2026
+const EXAM_DATE = new Date(2026, 9, 6); // 6 окт 2026
+const KEY = "ru_protocol_v1";
+
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function load(){
+  let raw = localStorage.getItem(KEY);
+  let data = raw ? JSON.parse(raw) : {today:"", checklist:[], tickets:0, note:"", history:[]};
+  const t = todayStr();
+  if(data.today !== t){
+    if(data.today && (data.tickets>0 || data.note || (data.checklist||[]).some(Boolean))){
+      const done = (data.checklist||[]).filter(Boolean).length;
+      data.history.unshift({
+        date: data.today,
+        tickets: data.tickets||0,
+        note: data.note||"",
+        pct: Math.round(100*done/STEPS.length)
+      });
+      data.history = data.history.slice(0,14);
+    }
+    data.today = t;
+    data.checklist = new Array(STEPS.length).fill(false);
+    data.tickets = 0;
+    data.note = "";
+  }
+  return data;
+}
+let state = load();
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+function renderToday(){
+  document.getElementById("today").textContent =
+    new Date().toLocaleDateString("ru-RU",{weekday:"long",day:"numeric",month:"long"});
+}
+function renderCountdown(){
+  const now = new Date();
+  document.getElementById("cd-days").textContent = Math.max(0, Math.ceil((EXAM_DATE-now)/86400000));
+  document.getElementById("cd-internal").textContent = Math.max(0, Math.ceil((INTERNAL_DATE-now)/86400000));
+}
+function renderSteps(){
+  const box = document.getElementById("steps");
+  box.innerHTML = "";
+  let done = 0;
+  STEPS.forEach((txt,i)=>{
+    const isDone = !!state.checklist[i];
+    if(isDone) done++;
+    const el = document.createElement("div");
+    el.className = "step" + (isDone ? " done" : "");
+    el.onclick = ()=>toggleStep(i);
+    el.innerHTML = `<div class="box"></div><div class="txt">${txt}</div>`;
+    box.appendChild(el);
+  });
+  document.getElementById("step-progress").textContent = "(" + done + "/" + STEPS.length + ")";
+}
+function toggleStep(i){
+  state.checklist[i] = !state.checklist[i];
+  save(); renderSteps();
+}
+function renderTickets(){
+  document.getElementById("t-count").textContent = state.tickets;
+}
+function addTickets(){
+  const n = parseInt(document.getElementById("t-input").value)||0;
+  addN(n);
+}
+function addN(n){ state.tickets += n; save(); renderTickets(); }
+function resetTickets(){ state.tickets = 0; save(); renderTickets(); }
+
+function saveNote(){
+  state.note = document.getElementById("note").value;
+  save(); renderHistory();
+}
+function renderHistory(){
+  document.getElementById("note").value = state.note || "";
+  const h = document.getElementById("history");
+  if(!state.history.length){
+    h.innerHTML = '<p class="empty">Пока нет прошлых дней</p>';
+    return;
+  }
+  h.innerHTML = state.history.map(e=>
+    `<div class="item"><span class="d">${e.date}</span>` +
+    `<span class="m">${e.pct}% протокола · ${e.tickets} билетов${e.note ? " · " + e.note : ""}</span></div>`
+  ).join("");
+}
+
+function computeStreak(){
+  let s = 0;
+  for(const e of state.history){ if(e.pct>=70) s++; else break; }
+  return s;
+}
+function renderStreak(){
+  const s = computeStreak();
+  document.getElementById("streak").textContent = s>0
+    ? "Стрик протокола: " + s + " дн. подряд ≥70%"
+    : "Стрик протокола: начни сегодня";
+}
+function resetAll(){
+  if(confirm("Удалить весь прогресс и историю?")){
+    localStorage.removeItem(KEY);
+    location.reload();
+  }
+}
+
+renderToday(); renderCountdown(); renderSteps(); renderTickets(); renderHistory(); renderStreak();
+setInterval(renderCountdown, 3600000);
+</script>
+</body>
+</html>
