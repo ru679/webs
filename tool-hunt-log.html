@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Журнал охоты за бесплатными инструментами</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1EDE3;
+    --paper-2:#E7E1D2;
+    --ink:#23281F;
+    --ink-soft:#5B5A4E;
+    --pine:#35462D;
+    --brass:#A9762F;
+    --line:#CFC7B2;
+    --app:#3B5B3A;
+    --site:#2E5B63;
+    --universal:#33415C;
+    --ai:#8B5E23;
+    --gh:#5C3B57;
+    --free:#35462D;
+    --freemium:#A9762F;
+    --paid:#8C4A3A;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--pine);}
+  .wrap{max-width:720px; margin:0 auto; padding:2.2rem 1.25rem 4rem;}
+  header{border-bottom:2px solid var(--ink); padding-bottom:1.1rem; margin-bottom:2rem;}
+  h1{
+    font-family:'Fraunces',serif; font-weight:650; font-size:clamp(1.6rem,5vw,2.15rem);
+    margin:0 0 .35rem; letter-spacing:-.01em;
+  }
+  .tagline{color:var(--ink-soft); margin:0 0 1.1rem; max-width:52ch;}
+  .stats{display:flex; gap:.6rem; flex-wrap:wrap;}
+  .stat{
+    background:var(--paper-2); border:1px solid var(--line); border-radius:3px;
+    padding:.45rem .7rem; font-size:.85rem;
+  }
+  .stat b{font-family:'Fraunces',serif; font-size:1.1rem; display:block; line-height:1;}
+  h2{font-family:'Fraunces',serif; font-weight:600; font-size:1.3rem; margin:0 0 .3rem;}
+  section{margin-bottom:2.6rem;}
+  .section-note{color:var(--ink-soft); font-size:.92rem; margin:0 0 1rem; max-width:58ch;}
+
+  details.route{
+    border-left:3px solid var(--line); padding:0 0 0 .95rem; margin-bottom:.6rem;
+  }
+  details.route[open]{padding-bottom:.5rem;}
+  details.route summary{
+    cursor:pointer; list-style:none; padding:.6rem 0; font-weight:600;
+  }
+  details.route summary::-webkit-details-marker{display:none;}
+  details.route summary::before{content:"+ "; color:var(--ink-soft); font-family:'JetBrains Mono',monospace;}
+  details.route[open] summary::before{content:"– ";}
+  details.route[data-cat="app"]{border-color:var(--app);}
+  details.route[data-cat="site"]{border-color:var(--site);}
+  details.route[data-cat="universal"]{border-color:var(--universal);}
+  details.route[data-cat="ai"]{border-color:var(--ai);}
+  details.route[data-cat="github"]{border-color:var(--gh);}
+  .route-desc{color:var(--ink-soft); font-size:.88rem; margin:-.3rem 0 .6rem; font-weight:400;}
+  pre{
+    background:var(--paper-2); border:1px solid var(--line); border-radius:3px;
+    padding:.9rem 1rem; font-family:'JetBrains Mono',monospace; font-size:.8rem;
+    white-space:pre-wrap; word-break:break-word; margin:0 0 .6rem;
+  }
+  .copy-btn{
+    background:var(--pine); color:var(--paper); border:none; border-radius:3px;
+    padding:.45rem .85rem; font-size:.85rem; cursor:pointer; font-family:inherit;
+  }
+  .copy-btn:hover{opacity:.9;}
+
+  form#logForm{
+    display:grid; grid-template-columns:1fr 1fr; gap:.6rem .7rem;
+    background:var(--paper-2); border:1px solid var(--line); border-radius:4px; padding:1rem;
+  }
+  form#logForm .full{grid-column:1/-1;}
+  label{font-size:.8rem; color:var(--ink-soft); display:block; margin-bottom:.2rem;}
+  input, select, textarea{
+    width:100%; padding:.5rem .55rem; border:1px solid var(--line); border-radius:3px;
+    font-family:inherit; font-size:.92rem; background:var(--paper); color:var(--ink);
+  }
+  textarea{resize:vertical; min-height:2.4rem;}
+  button[type="submit"]{
+    grid-column:1/-1; background:var(--ink); color:var(--paper); border:none;
+    border-radius:3px; padding:.65rem; font-size:.95rem; cursor:pointer; font-family:inherit;
+  }
+  button[type="submit"]:hover{opacity:.92;}
+
+  #logList{margin-top:1rem;}
+  .entry{
+    border-bottom:1px solid var(--line); padding:.6rem 0; position:relative;
+  }
+  .entry-main{display:flex; flex-wrap:wrap; gap:.5rem; align-items:baseline; padding-right:1.6rem;}
+  .entry-date{font-family:'JetBrains Mono',monospace; font-size:.78rem; color:var(--ink-soft);}
+  .tag{font-size:.76rem; color:var(--ink-soft); border:1px solid var(--line); border-radius:2px; padding:0 .35rem;}
+  .status-badge{font-size:.76rem; border-radius:2px; padding:0 .4rem; color:var(--paper);}
+  .entry.status-free .status-badge{background:var(--free);}
+  .entry.status-freemium .status-badge{background:var(--freemium);}
+  .entry.status-paid .status-badge{background:var(--paid);}
+  .entry-note{font-size:.86rem; color:var(--ink-soft); margin-top:.2rem;}
+  .del{
+    position:absolute; right:0; top:.55rem; background:none; border:none; color:var(--ink-soft);
+    font-size:1.1rem; cursor:pointer; line-height:1; padding:.1rem .3rem;
+  }
+  .del:hover{color:var(--paid);}
+  .empty-note{color:var(--ink-soft); font-size:.9rem; padding:.6rem 0;}
+  .export-row{margin-top:.9rem;}
+  #exportBtn{
+    background:none; border:1px solid var(--ink); color:var(--ink); border-radius:3px;
+    padding:.45rem .8rem; font-size:.85rem; cursor:pointer; font-family:inherit;
+  }
+  #exportBtn:hover{background:var(--ink); color:var(--paper);}
+
+  footer{color:var(--ink-soft); font-size:.82rem; border-top:1px solid var(--line); padding-top:1rem;}
+
+  :focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important; scroll-behavior:auto !important;} }
+  @media (max-width:520px){ form#logForm{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Журнал охоты за бесплатными инструментами</h1>
+    <p class="tagline">Пять готовых маршрутов поиска для DeepSeek / GLM / Kimi и дневник находок, который остаётся с тобой день за днём.</p>
+    <div class="stats">
+      <div class="stat"><b id="statTotal">0</b>находок записано</div>
+      <div class="stat"><b id="statDays">0</b>дней с записями</div>
+      <div class="stat"><b id="statStreak">0</b>дней подряд</div>
+    </div>
+  </header>
+
+  <main>
+    <section id="prompts">
+      <h2>Маршруты поиска</h2>
+      <p class="section-note">Раскрой нужный, нажми «Копировать» и вставь в чат с ИИ-поисковиком. В квадратных скобках — то, что меняешь под свою задачу.</p>
+
+      <details class="route" data-cat="app">
+        <summary>Приложения (мобильные / десктоп)</summary>
+        <p class="route-desc">Когда нужен инструмент в виде установленного приложения.</p>
+        <pre>Ты — исследователь инструментов. Я ищу приложение (мобильное и/или десктопное) для: [ЗАПРОС — опиши задачу].
+
+Критерии:
+1. В приоритете полностью бесплатные приложения. Фримиум/триал показывай только если полностью бесплатных набралось меньше 5 среди всего, что нашёл.
+2. Информация должна быть свежей. Если данные старше 6–12 месяцев — отдельно проверь, не изменились ли условия и не заброшено ли приложение.
+3. Не останавливайся на первых найденных вариантах. Ищи по разным источникам (обзоры, форумы, Reddit, каталоги приложений, GitHub — поиск и находки там не запрещены, часто там лежат лучшие open-source альтернативы) и продолжай, пока не соберёшь максимально полный список (от 15 вариантов, если ниша позволяет).
+4. Для каждого варианта в финальном списке подтверди актуальность минимум из двух независимых источников (например: официальная страница + свежий отзыв/тред за последний год). Если данные расходятся или проект похож на заброшенный — отметь это явно, не выбрасывай молча.
+
+Формат ответа:
+— Таблица: Название | Платформа | Цена/лимиты | Статус (бесплатно/фримиум/платно) | Когда обновлялось последний раз | Ссылка
+— Затем 2–3 предложения по 3–5 лучшим вариантам — почему именно они.
+
+Не додумывай данные и не обрывай поиск рано.</pre>
+        <button class="copy-btn">Копировать</button>
+      </details>
+
+      <details class="route" data-cat="site">
+        <summary>Сайты / веб-сервисы (SaaS)</summary>
+        <p class="route-desc">Онлайн-сервисы, к которым не нужно ничего устанавливать.</p>
+        <pre>Ты — исследователь инструментов. Я ищу сайт или онлайн-сервис (SaaS) для: [ЗАПРОС — опиши задачу].
+
+Критерии:
+1. В приоритете полностью бесплатные сервисы. Фримиум/подписку с бесплатным тарифом показывай только если полностью бесплатных набралось меньше 5.
+2. Проверяй актуальность — тарифы и лимиты у SaaS-сервисов часто меняются. Не бери данные старше 6–12 месяцев без перепроверки.
+3. Ищи по нескольким источникам (обзорные статьи, форумы, каталоги вроде AlternativeTo/G2, Reddit, GitHub — если сервис open-source или self-hosted, это тоже плюс) и не останавливайся на первых 2–3 найденных, пока не соберёшь полный список (от 15 вариантов).
+4. Для каждого варианта в финальном списке подтверди актуальность минимум из двух независимых источников (официальная страница цен + свежий отзыв). Если что-то похоже на закрытый проект — отметь явно.
+5. (если важно) Учитывай доступность в [СТРАНА/РЕГИОН — впиши при необходимости].
+
+Формат ответа:
+— Таблица: Название | Что делает | Цена/лимиты | Статус | Когда обновлялось | Ссылка
+— 2–3 предложения по 3–5 лучшим вариантам.</pre>
+        <button class="copy-btn">Копировать</button>
+      </details>
+
+      <details class="route" data-cat="universal">
+        <summary>Универсальный (для любого запроса)</summary>
+        <p class="route-desc">Когда не хочется думать, какой из шаблонов выбрать.</p>
+        <pre>Ты — исследователь инструментов. Я ищу: [ЗАПРОС — опиши, что нужно: приложение, сайт, сервис, библиотеку, что угодно].
+
+Критерии поиска:
+1. Максимально бесплатно — сначала полностью бесплатные варианты. Фримиум/триал показывай, только если полностью бесплатных найдётся меньше 5.
+2. Информация — только актуальная. Проверяй, не устарели ли данные (старше 6–12 месяцев требуют перепроверки: не закрылся ли проект, не изменилась ли цена).
+3. Ищи по нескольким источникам и запросам (обзоры, форумы, специализированные каталоги, GitHub — поиск там не запрещён и часто даёт лучшие бесплатные находки) и не останавливайся, пока не соберёшь полный самодостаточный список, из которого реально можно выбрать.
+4. Для каждого пункта финального списка подтверди актуальность минимум из двух независимых источников. Расхождения или признаки заброшенности — указывай прямо, не молчи.
+
+Формат ответа:
+— Таблица сравнения (название, цена/лимиты, статус, дата последнего обновления, ссылка)
+— Короткие пояснения по 3–5 лучшим вариантам.
+
+Не додумывай и не обрывай поиск рано.</pre>
+        <button class="copy-btn">Копировать</button>
+      </details>
+
+      <details class="route" data-cat="ai">
+        <summary>ИИ-агенты и локальные AI-инструменты</summary>
+        <p class="route-desc">Учитывает совместимость с твоим железом.</p>
+        <pre>Ты — исследователь ИИ-инструментов. Я ищу: [ЗАПРОС — например, агент, локальную модель, инструмент для автоматизации].
+
+Моё железо (если ищешь что-то для локального запуска): RTX 4060 Ti, 8 ГБ VRAM, 32 ГБ RAM. Тяжёлые модели сильно грузят такой ПК — если инструмент требователен к ресурсам, отдельно пометь это и предложи рядом более лёгкую или бесплатную облачную альтернативу (например через OpenRouter или похожие сервисы с бесплатным тарифом).
+
+Критерии:
+1. Максимально бесплатно — приоритет open-source и бесплатным API/тарифам. Платное показывай, только если бесплатных вариантов набралось меньше 5.
+2. Проверяй актуальность — в мире ИИ всё меняется очень быстро, бери данные не старше нескольких месяцев, где возможно.
+3. Ищи по нескольким источникам: GitHub (обязательно — там основная масса open-source агентов и моделей), Hugging Face, Reddit (r/LocalLLaMA и похожие), профильные блоги. Не останавливайся на первых найденных, собирай полный список.
+4. Для каждого варианта подтверди актуальность минимум из двух источников (репозиторий + свежее обсуждение/бенчмарк). Если проект заброшен (нет коммитов давно) — отметь явно.
+
+Формат ответа:
+— Таблица: Название | Тип (агент/модель/фреймворк) | Требования к железу | Цена/лимиты | Активность проекта | Ссылка
+— 2–3 предложения по 3–5 лучшим вариантам с учётом моего железа.</pre>
+        <button class="copy-btn">Копировать</button>
+      </details>
+
+      <details class="route" data-cat="github">
+        <summary>GitHub / open-source репозитории, шаблоны, датасеты</summary>
+        <p class="route-desc">Когда сразу знаешь, что искать нужно среди открытого кода.</p>
+        <pre>Ты — исследователь open-source проектов. Я ищу на GitHub (и смежных площадках вроде GitLab, Hugging Face): [ЗАПРОС — репозиторий, шаблон, датасет, библиотеку].
+
+Критерии:
+1. Приоритет — по-настоящему бесплатные и открытые лицензии (MIT, Apache 2.0, GPL и т.п.). Если лицензия ограничивает коммерческое использование — отдельно предупреди.
+2. Проверяй «живость» проекта: дата последнего коммита, активность issues/PR, число звёзд как ориентир (но не единственный критерий). Заброшенные форки не включай в топ без пометки.
+3. Не бери первый попавшийся репозиторий — ищи по разным запросам/тегам, сравнивай несколько похожих проектов, продолжай пока не соберёшь полный список реальных альтернатив.
+4. Для каждого варианта в финальном списке подтверди состояние минимум из двух источников (сам репозиторий + упоминание в статье/треде/сравнении).
+
+Формат ответа:
+— Таблица: Название | Что делает | Лицензия | Последний коммит | Звёзды | Ссылка
+— 2–3 предложения по 3–5 лучшим вариантам — почему они, для чего лучше подходят.</pre>
+        <button class="copy-btn">Копировать</button>
+      </details>
+    </section>
+
+    <section id="log">
+      <h2>Дневник находок</h2>
+      <p class="section-note">Что нашёл сегодня — заноси сюда. Хранится прямо в этом браузере, накапливается день за днём.</p>
+
+      <form id="logForm">
+        <div>
+          <label for="f-date">Дата</label>
+          <input type="date" id="f-date" name="date">
+        </div>
+        <div>
+          <label for="f-name">Название инструмента</label>
+          <input type="text" id="f-name" name="name" placeholder="напр. Canva" required>
+        </div>
+        <div>
+          <label for="f-category">Категория</label>
+          <select id="f-category" name="category">
+            <option value="Приложение">Приложение</option>
+            <option value="Сайт/SaaS">Сайт/SaaS</option>
+            <option value="ИИ/локальный">ИИ/локальный</option>
+            <option value="GitHub/шаблон">GitHub/шаблон</option>
+            <option value="Другое">Другое</option>
+          </select>
+        </div>
+        <div>
+          <label for="f-status">Статус</label>
+          <select id="f-status" name="status">
+            <option value="free">Бесплатно</option>
+            <option value="freemium">Фримиум</option>
+            <option value="paid">Платно</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="f-link">Ссылка (необязательно)</label>
+          <input type="url" id="f-link" name="link" placeholder="https://...">
+        </div>
+        <div class="full">
+          <label for="f-note">Заметка (необязательно)</label>
+          <textarea id="f-note" name="note" placeholder="Почему подошло / чем зацепило"></textarea>
+        </div>
+        <button type="submit">Добавить запись</button>
+      </form>
+
+      <div id="logList"></div>
+      <p class="empty-note" id="emptyNote">Пока пусто — добавь первую находку.</p>
+
+      <div class="export-row">
+        <button id="exportBtn">Скачать журнал (CSV)</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Записи хранятся локально в этом браузере (localStorage) — не отправляются никуда наружу. Открыв страницу с другого устройства или в другом браузере, увидишь пустой журнал; для бэкапа используй кнопку «Скачать журнал».
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  const STORE_KEY = 'toolHuntLog';
+  function loadLog(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch(e){ return []; } }
+  function saveLog(log){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(log)); } catch(e){} }
+  let log = loadLog();
+
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function statusLabel(s){ return {free:'бесплатно', freemium:'фримиум', paid:'платно'}[s] || s; }
+
+  function computeStreak(daySet){
+    let streak = 0;
+    let d = new Date();
+    while(true){
+      const s = d.toISOString().slice(0,10);
+      if(daySet.has(s)){ streak++; d.setDate(d.getDate()-1); } else break;
+    }
+    return streak;
+  }
+
+  function render(){
+    const list = document.getElementById('logList');
+    const emptyNote = document.getElementById('emptyNote');
+    list.innerHTML = '';
+    const sorted = [...log].sort((a,b)=> b.date.localeCompare(a.date) || b.id-a.id);
+    emptyNote.style.display = sorted.length ? 'none' : 'block';
+    sorted.forEach(entry=>{
+      const row = document.createElement('div');
+      row.className = 'entry status-' + entry.status;
+      row.innerHTML =
+        '<div class="entry-main">' +
+          '<span class="entry-date">' + escapeHtml(entry.date) + '</span>' +
+          '<strong>' + escapeHtml(entry.name) + '</strong>' +
+          '<span class="tag">' + escapeHtml(entry.category) + '</span>' +
+          '<span class="status-badge">' + statusLabel(entry.status) + '</span>' +
+          (entry.link ? '<a href="' + escapeHtml(entry.link) + '" target="_blank" rel="noopener">ссылка</a>' : '') +
+        '</div>' +
+        (entry.note ? '<div class="entry-note">' + escapeHtml(entry.note) + '</div>' : '') +
+        '<button class="del" data-id="' + entry.id + '" aria-label="Удалить запись">×</button>';
+      list.appendChild(row);
+    });
+    document.getElementById('statTotal').textContent = log.length;
+    const days = new Set(log.map(e=>e.date));
+    document.getElementById('statDays').textContent = days.size;
+    document.getElementById('statStreak').textContent = computeStreak(days);
+  }
+
+  document.getElementById('f-date').value = todayStr();
+
+  document.getElementById('logForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const f = e.target;
+    const name = f.name.value.trim();
+    if(!name) return;
+    log.push({
+      id: Date.now(),
+      date: f.date.value || todayStr(),
+      name: name,
+      category: f.category.value,
+      status: f.status.value,
+      link: f.link.value.trim(),
+      note: f.note.value.trim()
+    });
+    saveLog(log);
+    f.reset();
+    f.date.value = todayStr();
+    render();
+  });
+
+  document.getElementById('logList').addEventListener('click', function(e){
+    if(e.target.classList.contains('del')){
+      const id = Number(e.target.dataset.id);
+      log = log.filter(x => x.id !== id);
+      saveLog(log);
+      render();
+    }
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', function(){
+    const rows = [['date','name','category','status','link','note']]
+      .concat(log.map(e => [e.date, e.name, e.category, statusLabel(e.status), e.link, e.note]));
+    const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'tool-hunt-log.csv'; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.querySelectorAll('.copy-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const pre = btn.previousElementSibling;
+      navigator.clipboard.writeText(pre.textContent).then(function(){
+        const old = btn.textContent;
+        btn.textContent = 'Скопировано';
+        setTimeout(function(){ btn.textContent = old; }, 1500);
+      }).catch(function(){});
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
