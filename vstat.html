@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Встать</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Встать">
+<meta name="theme-color" content="#1B1714">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Vstat%22%2C%22short_name%22%3A%22Vstat%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231B1714%22%2C%22theme_color%22%3A%22%231B1714%22%7D">
+<style>
+  :root{
+    --bg:#1B1714;
+    --panel:#262019;
+    --panel-2:#2E261B;
+    --accent:#E8A855;
+    --accent-ink:#1B1714;
+    --cool:#7C93A8;
+    --text:#F3ECE1;
+    --muted:#A69C8C;
+    --success:#8FAE7B;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;margin:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,system-ui,sans-serif;
+    overscroll-behavior:none;
+    -webkit-font-smoothing:antialiased;
+  }
+  button, input{font-family:inherit;}
+  button:focus-visible, input:focus-visible{
+    outline:2px solid var(--cool);
+    outline-offset:3px;
+  }
+  .app{
+    max-width:420px;
+    margin:0 auto;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    padding:calc(env(safe-area-inset-top,0px) + 22px) 22px
+            calc(env(safe-area-inset-bottom,0px) + 26px);
+  }
+  .streak{
+    align-self:flex-start;
+    font-size:13px;
+    color:var(--muted);
+    background:var(--panel);
+    padding:7px 14px;
+    border-radius:999px;
+    line-height:1.2;
+  }
+  .streak.on{color:var(--accent);}
+  .storage-warn{
+    font-size:12px;
+    color:var(--cool);
+    max-width:280px;
+    line-height:1.4;
+    margin-top:8px;
+  }
+  main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:26px;
+    text-align:center;
+  }
+  .hint{
+    font-size:14px;
+    color:var(--muted);
+    max-width:270px;
+    line-height:1.45;
+    margin:0;
+  }
+  .chips{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:center;
+    max-width:320px;
+  }
+  .chip{
+    padding:9px 16px;
+    border-radius:999px;
+    border:1px solid var(--panel-2);
+    background:transparent;
+    color:var(--text);
+    font-size:14px;
+    cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .chip.selected{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:var(--accent-ink);
+    font-weight:600;
+  }
+  .chip-input{
+    padding:9px 14px;
+    border-radius:999px;
+    border:1px solid var(--cool);
+    background:transparent;
+    color:var(--text);
+    font-size:14px;
+    width:150px;
+    display:none;
+  }
+  .chip-input.show{display:inline-block;}
+  .task-label{
+    min-height:18px;
+    font-size:14px;
+    color:var(--cool);
+  }
+  .dial{
+    position:relative;
+    width:230px;
+    height:230px;
+  }
+  .dial svg{
+    width:100%;
+    height:100%;
+    transform:rotate(-90deg);
+  }
+  .dial circle{
+    fill:none;
+    stroke-width:12;
+  }
+  .ring-bg{stroke:var(--panel);}
+  .ring-progress{
+    stroke:var(--accent);
+    stroke-linecap:round;
+    transition:stroke-dashoffset .9s linear, stroke .25s;
+  }
+  .ring-progress.done{stroke:var(--success);}
+  .digit{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui,sans-serif;
+    font-size:88px;
+    font-weight:800;
+    color:var(--text);
+  }
+  .digit.pulse{animation:pulse .5s ease-out;}
+  @keyframes pulse{
+    0%{transform:scale(.72);opacity:0;}
+    45%{transform:scale(1.1);opacity:1;}
+    100%{transform:scale(1);opacity:1;}
+  }
+  .actions{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    width:100%;
+  }
+  .btn-primary{
+    width:100%;
+    max-width:280px;
+    padding:15px;
+    border-radius:16px;
+    border:none;
+    background:var(--accent);
+    color:var(--accent-ink);
+    font-size:17px;
+    font-weight:700;
+    cursor:pointer;
+    transition:background .2s, transform .1s;
+  }
+  .btn-primary:active{transform:scale(.97);}
+  .btn-primary.success{background:var(--success);}
+  .btn-primary[disabled]{opacity:.5;}
+  .btn-link{
+    background:none;
+    border:none;
+    color:var(--cool);
+    font-size:14px;
+    text-decoration:underline;
+    cursor:pointer;
+    padding:4px;
+  }
+  .feedback{
+    min-height:20px;
+    font-size:14px;
+    color:var(--success);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ring-progress{transition-duration:.01ms;}
+    .digit.pulse{animation-duration:.01ms;}
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="streak" id="streakPill">Серия начнётся сегодня</div>
+    <div class="storage-warn" id="storageWarn" hidden>Браузер не даёт сохранять данные (приватный режим?) — серия не запомнится между открытиями.</div>
+
+    <main>
+      <p class="hint" id="hint">Выбери, что делаешь дальше, и досчитай до нуля — на нуле встаёшь.</p>
+
+      <div class="chips" id="chips">
+        <button class="chip" data-task="Читать">Читать</button>
+        <button class="chip" data-task="Домашка">Домашка</button>
+        <button class="chip" data-task="Шахматы">Шахматы</button>
+        <button class="chip" data-task="Итальянский">Итальянский</button>
+        <button class="chip" data-task="Работа">Работа</button>
+        <button class="chip" data-task="Мелкие дела">Мелкие дела</button>
+        <button class="chip" id="chipCustomBtn" data-task="__custom">+ своё</button>
+        <input class="chip-input" id="customInput" placeholder="Например, помыть руки" maxlength="40">
+      </div>
+
+      <div class="task-label" id="taskLabel"></div>
+
+      <div class="dial">
+        <svg viewBox="0 0 230 230">
+          <circle class="ring-bg" cx="115" cy="115" r="103"></circle>
+          <circle class="ring-progress" id="ring" cx="115" cy="115" r="103"></circle>
+        </svg>
+        <div class="digit" id="digit">3</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" id="primaryBtn">Начать отсчёт</button>
+        <button class="btn-link" id="retryBtn" hidden>Не встал — ещё раз</button>
+        <div class="feedback" id="feedback"></div>
+      </div>
+    </main>
+  </div>
+
+<script>
+(function(){
+  var CIRC = 2 * Math.PI * 103;
+  var ring = document.getElementById('ring');
+  var digitEl = document.getElementById('digit');
+  var primaryBtn = document.getElementById('primaryBtn');
+  var retryBtn = document.getElementById('retryBtn');
+  var hint = document.getElementById('hint');
+  var taskLabel = document.getElementById('taskLabel');
+  var feedback = document.getElementById('feedback');
+  var streakPill = document.getElementById('streakPill');
+  var chipsWrap = document.getElementById('chips');
+  var customInput = document.getElementById('customInput');
+  var chipCustomBtn = document.getElementById('chipCustomBtn');
+  var storageWarn = document.getElementById('storageWarn');
+
+  var storageOK = true;
+  try{
+    var __t = '__vstat_test__';
+    localStorage.setItem(__t, '1');
+    localStorage.removeItem(__t);
+  }catch(e){
+    storageOK = false;
+  }
+  if (!storageOK) storageWarn.hidden = false;
+
+  ring.style.strokeDasharray = CIRC;
+  ring.style.strokeDashoffset = 0;
+
+  var state = 'idle'; // idle | counting | zero
+  var selectedTask = null;
+  var storeKey = 'vstat_streak_v1';
+  var memoryStore = null;
+
+  function loadStore(){
+    try{
+      var raw = localStorage.getItem(storeKey);
+      return raw ? JSON.parse(raw) : { streak: 0, lastDate: null };
+    }catch(e){
+      return memoryStore || { streak: 0, lastDate: null };
+    }
+  }
+  function saveStore(data){
+    try{
+      localStorage.setItem(storeKey, JSON.stringify(data));
+    }catch(e){
+      memoryStore = data;
+    }
+  }
+  function todayISO(){
+    var d = new Date();
+    d.setHours(0,0,0,0);
+    return d.toISOString().slice(0,10);
+  }
+  function diffDays(aISO, bISO){
+    var a = new Date(aISO), b = new Date(bISO);
+    return Math.round((b - a) / 86400000);
+  }
+  function pluralDays(n){
+    var mod10 = n % 10, mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return 'день';
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'дня';
+    return 'дней';
+  }
+  function renderStreak(){
+    var data = loadStore();
+    if (data.streak > 0){
+      streakPill.textContent = '\uD83D\uDD25 ' + data.streak + ' ' + pluralDays(data.streak) + ' подряд';
+      streakPill.classList.add('on');
+    } else {
+      streakPill.textContent = 'Серия начнётся сегодня';
+      streakPill.classList.remove('on');
+    }
+  }
+
+  function selectChip(btn){
+    var task = btn.getAttribute('data-task');
+    if (task === '__custom'){
+      customInput.classList.add('show');
+      customInput.focus();
+      return;
+    }
+    Array.prototype.forEach.call(chipsWrap.querySelectorAll('.chip'), function(c){
+      c.classList.remove('selected');
+    });
+    btn.classList.add('selected');
+    selectedTask = task;
+  }
+
+  chipsWrap.addEventListener('click', function(e){
+    var btn = e.target.closest('.chip');
+    if (btn) selectChip(btn);
+  });
+
+  function commitCustom(){
+    var val = customInput.value.trim();
+    if (!val) { customInput.classList.remove('show'); return; }
+    Array.prototype.forEach.call(chipsWrap.querySelectorAll('.chip'), function(c){
+      c.classList.remove('selected');
+    });
+    chipCustomBtn.textContent = val;
+    chipCustomBtn.classList.add('selected');
+    chipCustomBtn.setAttribute('data-task', val);
+    selectedTask = val;
+    customInput.classList.remove('show');
+  }
+  customInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') commitCustom();
+  });
+  customInput.addEventListener('blur', commitCustom);
+
+  function delay(ms){
+    return new Promise(function(resolve){ setTimeout(resolve, ms); });
+  }
+
+  function setDigit(n){
+    digitEl.textContent = n;
+    digitEl.classList.remove('pulse');
+    void digitEl.offsetWidth;
+    digitEl.classList.add('pulse');
+  }
+  function setRingOffset(fraction){
+    ring.style.strokeDashoffset = CIRC * fraction;
+  }
+
+  async function runCountdown(){
+    state = 'counting';
+    primaryBtn.hidden = true;
+    retryBtn.hidden = true;
+    feedback.textContent = '';
+    hint.textContent = selectedTask
+      ? 'Встаём: ' + selectedTask
+      : 'Встаём. На нуле — подъём.';
+    taskLabel.textContent = '';
+    ring.classList.remove('done');
+    setRingOffset(0);
+    setDigit(3);
+    if (navigator.vibrate) { try{ navigator.vibrate(30); }catch(e){} }
+    await delay(1000);
+    setDigit(2);
+    setRingOffset(1/3);
+    if (navigator.vibrate) { try{ navigator.vibrate(30); }catch(e){} }
+    await delay(1000);
+    setDigit(1);
+    setRingOffset(2/3);
+    if (navigator.vibrate) { try{ navigator.vibrate([30,40,60]); }catch(e){} }
+    await delay(1000);
+    setDigit(0);
+    setRingOffset(1);
+    ring.classList.add('done');
+    if (navigator.vibrate) { try{ navigator.vibrate(80); }catch(e){} }
+    await delay(450);
+    showZeroState();
+  }
+
+  function showZeroState(){
+    state = 'zero';
+    hint.textContent = 'Встал?';
+    primaryBtn.hidden = false;
+    primaryBtn.textContent = 'Встал';
+    primaryBtn.classList.add('success');
+    retryBtn.hidden = false;
+  }
+
+  function confirmGotUp(){
+    var data = loadStore();
+    var today = todayISO();
+    if (data.lastDate === today){
+      feedback.textContent = 'Уже отмечено сегодня 👍';
+    } else if (data.lastDate && diffDays(data.lastDate, today) === 1){
+      data.streak += 1;
+      data.lastDate = today;
+      saveStore(data);
+      feedback.textContent = 'Записал. Серия: ' + data.streak;
+    } else {
+      data.streak = 1;
+      data.lastDate = today;
+      saveStore(data);
+      feedback.textContent = 'Записал. Начало новой серии.';
+    }
+    renderStreak();
+    setTimeout(resetToIdle, 1300);
+  }
+
+  function resetToIdle(){
+    state = 'idle';
+    hint.textContent = 'Выбери, что делаешь дальше, и досчитай до нуля — на нуле встаёшь.';
+    feedback.textContent = '';
+    taskLabel.textContent = '';
+    primaryBtn.hidden = false;
+    primaryBtn.disabled = false;
+    primaryBtn.textContent = 'Начать отсчёт';
+    primaryBtn.classList.remove('success');
+    retryBtn.hidden = true;
+    ring.classList.remove('done');
+    setRingOffset(0);
+    digitEl.classList.remove('pulse');
+    digitEl.textContent = '3';
+  }
+
+  primaryBtn.addEventListener('click', function(){
+    if (state === 'idle') runCountdown();
+    else if (state === 'zero') confirmGotUp();
+  });
+  retryBtn.addEventListener('click', function(){
+    runCountdown();
+  });
+
+  renderStreak();
+})();
+</script>
+</body>
+</html>
