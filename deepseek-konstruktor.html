@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Конструктор промптов для дипсика</title>
+<style>
+:root{--bg:#f6f6f2;--ink:#1d211f;--sub:#626962;--line:#d8d8d0;--card:#fff;--ac:#1f6f5c;--acink:#fff}
+@media(prefers-color-scheme:dark){:root{--bg:#141716;--ink:#e9ebe6;--sub:#9aa29a;--line:#2f3532;--card:#1b1f1d;--ac:#5fd0b0;--acink:#0e1412}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:0 0 110px}
+header,main{max-width:680px;margin:0 auto;padding:16px 18px}
+header{padding-bottom:0;padding-top:max(16px,env(safe-area-inset-top))}
+h1{font-size:1.3rem;margin:0 0 4px}
+header p,.hint,.note{color:var(--sub);font-size:.85rem;margin:4px 0 0}
+h2{font-size:.95rem;margin:22px 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{font:inherit;font-size:.9rem;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.chips button.on{background:var(--ac);color:var(--acink);border-color:var(--ac)}
+.chips button:disabled{opacity:.4}
+.off{opacity:.45}
+.hidden{display:none}
+.fld{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:.9rem}
+.fld input{width:80px;font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;white-space:pre-wrap;word-break:break-word;font:.85rem/1.55 "SF Mono",Menlo,Consolas,monospace;margin:0}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:10px 18px calc(10px + env(safe-area-inset-bottom))}
+.bar button{display:block;width:100%;max-width:680px;margin:0 auto;font:inherit;font-weight:600;padding:14px;border:0;border-radius:12px;background:var(--ac);color:var(--acink);cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <h1>Конструктор промптов для дипсика</h1>
+  <p>Выбери предмет, ситуацию и режим, нажми «Скопировать», вставь в новый чат и допиши задание.</p>
+</header>
+<main>
+  <h2>Предмет</h2><div class="chips" id="subj"></div>
+  <h2>Ситуация</h2><div class="chips" id="sit"></div>
+  <div id="modeSec"><h2>Режим</h2><div class="chips" id="mode"></div><p class="hint" id="modeHint"></p></div>
+  <div id="fldSec" class="hidden"><h2>Объём</h2>
+    <label class="fld"><span id="nLab"></span><input id="nIn" type="number" min="0" max="60"></label>
+    <label class="fld hidden" id="wppRow"><span>Слов на тетрадной странице</span><input id="wppIn" type="number" min="40" max="400"></label>
+    <p class="hint hidden" id="wppHint">Не знаешь, оставь как есть. Если конспект выходит длиннее страницы, уменьши число.</p>
+  </div>
+  <h2>Переключатели</h2><div class="chips" id="tog"></div>
+  <p class="note">Всегда включено: «спроси, если не хватает» и «не выдумывай, неуверенное помечай».</p>
+  <h2>Готовый промпт</h2><pre id="out"></pre>
+</main>
+<div class="bar"><button id="copy">Скопировать промпт</button></div>
+
+<script>
+const S=[
+{id:'hist',n:'История России',r:'Выделяй даты, имена и термины. Пиши подробно, но в заданном объёме.',files:1},
+{id:'org',n:'Основы российской государственности',r:'Выделяй даты, имена, термины и определения.',files:1},
+{id:'phys',n:'Физика',r:'Оформляй как в вузе: Дано, Найти, Решение (рисунок, закон, проекции на оси, подстановка с единицами), Ответ. g возьми из условия, если не указано, спроси.',zero:1},
+{id:'logic',n:'Математическая логика',r:'К каждому шагу пиши, какой закон или формула применены. Не торопись, расписывай каждый логический шаг.',zero:1},
+{id:'alg',n:'Алгебра и геометрия',r:'Решай способом, которому учат на лекции. К каждому шагу пиши формулу или правило.',zero:1},
+{id:'calc',n:'Математический анализ',r:'Решай способом из лекции, к каждому шагу пиши формулу или правило. Внимательно проверяй знаки и к чему стремится переменная (+∞ или −∞).'},
+{id:'prog',n:'Языки программирования',r:'Пиши на C++ на уровне лекции: только конструкции из презентаций, простые названия переменных. Объясняй код построчно, чтобы я смог объяснить его на защите.',zero:1},
+{id:'ict',n:'Основы ИКТ (Linux)',r:'Для каждой команды объясни, что она делает, зачем и как проверить результат. Подскажи, что вставить в отчёт (команда, скриншот, пояснение).'},
+{id:'tip',n:'ТиПЭК (русский, коммуникации)',r:'Раздели по заданию, что письменно, что устно, в каком формате и с каким названием файла сдавать.'},
+{id:'oth',n:'Другой предмет',r:''}];
+
+const T=[
+{id:'route',n:'Что делать с заданием',skip:1,mode:1,tail:'Задание:',t:c=>'Внимательно прочитай задание препода ниже и прикреплённые файлы. Скажи по шагам: что делать, что открывать, что знать, чего бояться, чему радоваться.' Разбей задание на пункты. По каждому пункту сначала процитируй из задания нужную фразу дословно, потом чётко скажи: письменно это или устно, что именно писать, куда и в каком формате сдавать.'+(c.m==='urgent'?' Времени мало: раздели на «сделать сейчас» (то, что нужно сдать) и «доучить потом» (устное, теория).':' Отдельно отметь, что можно доучить потом.')+' Отдельно: как назвать файл. Если в задании что-то неясно (дата, формат, письменно или устно), не угадывай, а спроси.'},
+{id:'solve',n:'Решить задачи',mode:1,tail:'Задание:',t:()=>'Реши задачи из прикреплённого файла или фото.'},
+{id:'explain',n:'Объяснить тему',tail:'Тема:',t:()=>'Объясни тему по прикреплённым материалам: сначала суть простыми словами, потом пример, потом что обычно спрашивают.'},
+{id:'kt',n:'Подготовка к КТ',phone:1,tail:'Что известно о КТ:',t:()=>'Готовлюсь к контрольной точке. Ниже то, что я о ней знаю. По прикреплённым материалам скажи, что реально может быть (факты, определения, типы задач), и дозаполни пробелы. Потом проведи опрос по одному вопросу и разбирай мои ответы.'},
+{id:'lab',n:'Лаба: защита',phone:1,tail:'Заметки по лабе:',t:()=>'Готовлюсь к защите лабораторной (файл прикреплён). Сначала коротко: что в ней делалось и зачем. Потом задавай вопросы по одному, как на защите, жди моего ответа и разбирай, что я сказал не так. Спрашивай не только контрольные вопросы, но и вероятные.'},
+{id:'labprep',n:'Лаба: подготовка к паре',phone:1,nr:1,f:{l:'Страниц конспекта (0 = без лимита)',d:0},wpp:1,tail:'Заметки по лабе:',t:c=>'Готовлюсь к лабораторной работе (в прикреплённом PDF методичка). Сначала прочитай её целиком. На паре я буду отвечать на вопросы преподавателя только по своей тетради, а потом выполнять работу на приборе и записывать результаты, поэтому подготовь:\n1. Конспект для тетради: только главное, без второстепенного, но достаточно полный, чтобы по нему можно было ответить: цель, теория и формулы (с пояснением обозначений и единиц), схема установки, порядок измерений, как считать результат и погрешность, что должно получиться.'+(c.n?' Объём: около '+c.n*c.w+' слов ('+c.n+' тетрадных стр.).':'')+'\n2. Алгоритм выполнения на приборе: пошагово, что делать, что измерять, какие таблицы подготовить заранее, что записывать.\n3. Вопросы: контрольные из методички с короткими ответами и ещё вероятные вопросы по теме.\n4. Что выучить дома, а что достаточно сверить по тетради на паре.\nВ конце проведи мне опрос по одному вопросу, чтобы я проверил себя.'},
+{id:'cons',n:'Конспект',f:{l:'Тетрадных страниц',d:2},wpp:1,tail:'Материал или тема:',t:c=>`Сократи прикреплённый материал в конспект для письма от руки на ${c.n} тетрадных стр. (примерно ${c.n*c.w} слов, ${c.w} слов на страницу). Не слишком коротко: даты, имена, термины и причины сохрани, преподаватель требует подробно. Структура: заголовки и тезисы, сокращения слов допустимы.`},
+{id:'talk',n:'Доклад / презентация',nr:1,f:{l:'Минут речи',d:5},tail:'Тема и задание:',t:c=>`Составь текст доклада на ${c.n} мин. речи (примерно ${c.n*130} слов) по теме ниже и прикреплённым файлам, и отдельно тезисы для слайдов. В конце дай вероятные вопросы от препода и одногруппников с ответами и один короткий совет по выступлению.`},
+{id:'files',n:'Ответы по файлам',mode:1,tail:'Задание:',t:()=>'Ответь на задания по прикреплённым файлам (методичка, учебник, словарь). После каждого блока укажи, откуда это взято (файл, страница или параграф).'},
+{id:'mtest',n:'Мудл-тест',mode:1,tail:'Вопросы:',t:()=>'Ниже вопросы мудл-теста. Ответь на каждый.'},
+{id:'tool',n:'Бесплатный инструмент',nr:1,tool:1,tail:'Задача:',t:()=>'Нужен реально бесплатный (без скрытой подписки и без водяных знаков) и качественный инструмент или ИИ для задачи ниже. Дай 2-3 конкретных варианта. По каждому: что именно бесплатно и чего нет, ограничения, работает ли на русском. Проверь актуальность через поиск, если не уверен, скажи прямо.'}];
+
+const M=[
+{id:'urgent',n:'Срочно',t:'Режим: срочно. Дай полное решение: каждый шаг и ответ.'},
+{id:'learn',n:'Разобраться',t:'Режим: хочу разобраться. Веди подсказками, не давая сразу ответ; когда я попробую сам, проверь мою попытку.'},
+{id:'ans',n:'Только ответы',t:'Режим: только ответы, без объяснений.'},
+{id:'short',n:'Ответ + коротко',t:'Режим: ответ и короткое объяснение (1-2 строки), почему так.'}];
+
+const G=[
+{id:'zero',n:'Объясняй с нуля'},
+{id:'files',n:'Только по файлам, без интернета'},
+{id:'quiz',n:'Потом проверь меня вопросами'},
+{id:'restate',n:'Перепечатай условие'},
+{id:'phone',n:'Отвечаю с телефона'}];
+
+const st={s:'phys',t:'solve',m:'urgent',g:{zero:1},nv:{},w:150};
+try{const x=JSON.parse(localStorage.getItem('dskc'));if(x)Object.assign(st,x)}catch(e){}
+const $=id=>document.getElementById(id);
+const cur=()=>({s:S.find(x=>x.id===st.s)||S[0],t:T.find(x=>x.id===st.t)||T[0]});
+
+function chips(box,items,isOn,onClick,dis){
+  box.innerHTML='';
+  items.forEach(it=>{const b=document.createElement('button');b.textContent=it.n;
+    if(isOn(it))b.className='on';if(dis&&dis(it))b.disabled=true;
+    b.onclick=()=>{onClick(it);render()};box.appendChild(b)});
+}
+
+function build(){
+  const {s,t}=cur(),g=st.g,L=[];
+  const n=st.nv[t.id]||(t.f?t.f.d:0);
+  L.push(`Я первокурсник (ИТ). Предмет: ${s.n}.${g.zero?' Объясняй с нуля, как новичку.':''}`);
+  L.push(t.t({m:st.m,n:n,w:st.w}));
+  const useMode=t.mode&&!t.skip;
+  if(useMode)L.push(M.find(x=>x.id===st.m).t);
+  if(s.r&&!t.nr)L.push(s.r);
+  if(g.restate&&useMode)L.push('Перед решением перепечатай условие каждого задания так, как ты его понял, чтобы я проверил.');
+  if(g.files&&!t.tool)L.push('Опирайся только на прикреплённые файлы и моё задание, без интернета и без своих знаний сверх них. Если чего-то нет в файлах, так и скажи.');
+  if(g.quiz)L.push('В конце проверь меня: задай вопросы по одному и разбери мои ответы.');
+  if(g.phone)L.push('Я отвечаю с телефона: заглавные буквы и автозамену ошибкой не считай, ошибки по сути считай.');
+  L.push('Если не хватает файла, условия или страница не читается, спроси, не угадывай и не придумывай. Если в чём-то не уверен, пометь это.');
+  L.push(t.tail);
+  return L.join('\n');
+}
+
+function render(){
+  const {t}=cur();
+  chips($('subj'),S,x=>x.id===st.s,x=>{st.s=x.id;st.g.zero=x.zero?1:0;st.g.files=x.files?1:0});
+  chips($('sit'),T,x=>x.id===st.t,x=>{st.t=x.id;st.g.phone=x.phone?1:0});
+  chips($('mode'),M,x=>x.id===st.m,x=>{st.m=x.id});
+  $('modeSec').classList.toggle('off',!t.mode);
+  $('modeHint').textContent=t.skip?'Здесь важно только «Срочно» (мало времени), остальное не влияет.':(t.mode?'':'Для этой ситуации режим не нужен.');
+  chips($('tog'),G,x=>st.g[x.id],x=>{st.g[x.id]=st.g[x.id]?0:1},x=>x.id==='files'&&t.tool);
+  $('fldSec').classList.toggle('hidden',!t.f);
+  if(t.f){$('nLab').textContent=t.f.l;$('nIn').value=st.nv[t.id]||t.f.d;}
+  $('wppRow').classList.toggle('hidden',!t.wpp);
+  $('wppHint').classList.toggle('hidden',!t.wpp);
+  $('wppIn').value=st.w;
+  $('out').textContent=build();
+  try{localStorage.setItem('dskc',JSON.stringify(st))}catch(e){}
+}
+
+$('nIn').oninput=e=>{const v=parseInt(e.target.value,10);if(v>=0){st.nv[st.t]=v;$('out').textContent=build();try{localStorage.setItem('dskc',JSON.stringify(st))}catch(x){}}};
+$('wppIn').oninput=e=>{const v=parseInt(e.target.value,10);if(v>0){st.w=v;$('out').textContent=build();try{localStorage.setItem('dskc',JSON.stringify(st))}catch(x){}}};
+
+$('copy').onclick=async()=>{
+  const txt=build(),b=$('copy');
+  try{await navigator.clipboard.writeText(txt)}catch(e){
+    const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}
+  b.textContent='Скопировано';setTimeout(()=>b.textContent='Скопировать промпт',1500);
+};
+render();
+</script>
+</body>
+</html>
