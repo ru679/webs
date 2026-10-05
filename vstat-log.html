@@ -30,8 +30,8 @@
     overscroll-behavior:none;
     -webkit-font-smoothing:antialiased;
   }
-  button, input{font-family:inherit;}
-  button:focus-visible, input:focus-visible{
+  button, input, textarea{font-family:inherit;}
+  button:focus-visible, input:focus-visible, textarea:focus-visible{
     outline:2px solid var(--cool);
     outline-offset:3px;
   }
@@ -261,6 +261,26 @@
     margin-top:10px;
   }
   .log-input:focus-visible{border-color:var(--cool);}
+  textarea.log-input{display:block;resize:vertical;line-height:1.4;}
+  .date-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .date-label{
+    font-size:13px;
+    color:var(--muted);
+    text-align:center;
+    margin-top:-6px;
+  }
+  .log-entry .note{
+    display:block;
+    margin-top:4px;
+    color:var(--text);
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
   .log-history{
     display:flex;
     flex-direction:column;
@@ -335,13 +355,20 @@
       <div class="log-wrap">
         <div class="banner">Диагностический лог на 14 дней — чтобы понять, что реально тормозит рост, вместо того чтобы гадать. Заполняй вечером, 1–2 минуты. Данные хранятся только в этом браузере.</div>
 
+        <div class="date-row" id="dateRow">
+          <button class="chip selected" data-offset="0">Сегодня</button>
+          <button class="chip" data-offset="-1">Вчера</button>
+          <button class="chip" data-offset="-2">Позавчера</button>
+        </div>
+        <div class="date-label" id="dateLabel"></div>
+
         <div class="log-field">
           <div class="log-label">Бизнес — сделал сегодня конкретное действие?</div>
           <div class="chips" data-group="biz">
             <button class="chip" data-val="yes">Да</button>
             <button class="chip" data-val="no">Нет</button>
           </div>
-          <input class="log-input" id="bizWhat" placeholder="Что именно? (необязательно)" maxlength="80">
+          <textarea class="log-input" id="bizWhat" rows="2" placeholder="Что именно? (необязательно)" maxlength="500"></textarea>
         </div>
 
         <div class="log-field">
@@ -376,10 +403,10 @@
             <button class="chip" data-val="Недосып">Недосып</button>
             <button class="chip" data-val="Ничего">Всё ок, не мешало</button>
           </div>
-          <input class="log-input" id="blockerNote" placeholder="Уточни в одну строку (необязательно)" maxlength="100">
+          <textarea class="log-input" id="blockerNote" rows="4" placeholder="Опиши подробнее: что случилось, когда, что чувствовал (необязательно)" maxlength="2000"></textarea>
         </div>
 
-        <button class="btn-primary" id="saveLogBtn">Сохранить сегодняшний лог</button>
+        <button class="btn-primary" id="saveLogBtn">Сохранить лог</button>
         <div class="feedback" id="logFeedback"></div>
 
         <div class="log-history">
@@ -651,8 +678,34 @@
   var saveLogBtn = document.getElementById('saveLogBtn');
   var logFeedback = document.getElementById('logFeedback');
   var logHistoryList = document.getElementById('logHistoryList');
+  var dateRow = document.getElementById('dateRow');
+  var dateLabel = document.getElementById('dateLabel');
+  var logDate = null;
 
-  document.querySelectorAll('#tab-log .chips').forEach(function(group){
+  // дата считается тем же способом, что и раньше (todayISO), чтобы не сломать уже сохранённые записи
+  function shiftISO(iso, n){
+    var d = new Date(iso + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().slice(0,10);
+  }
+  function esc(str){
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function setLogDate(offset){
+    logDate = shiftISO(todayISO(), offset);
+    Array.prototype.forEach.call(dateRow.querySelectorAll('.chip'), function(c){
+      c.classList.toggle('selected', Number(c.getAttribute('data-offset')) === offset);
+    });
+    var data = loadLog();
+    fillLogForm(data[logDate]);
+    dateLabel.textContent = 'Запись за ' + logDate + (data[logDate] ? ' — уже есть, можно править' : '');
+  }
+  dateRow.addEventListener('click', function(e){
+    var btn = e.target.closest('.chip');
+    if (btn) setLogDate(Number(btn.getAttribute('data-offset')));
+  });
+
+  document.querySelectorAll('#tab-log .log-field .chips').forEach(function(group){
     group.addEventListener('click', function(e){
       var btn = e.target.closest('.chip');
       if (!btn) return;
@@ -673,7 +726,7 @@
 
   function clearLogForm(){
     logSelections = { biz: null, discipline: null, energy: null, blocker: [] };
-    document.querySelectorAll('#tab-log .chip').forEach(function(c){ c.classList.remove('selected'); });
+    document.querySelectorAll('#tab-log .log-field .chip').forEach(function(c){ c.classList.remove('selected'); });
     bizWhat.value = '';
     sleepHours.value = '';
     blockerNote.value = '';
@@ -690,7 +743,7 @@
     bizWhat.value = entry.bizWhat || '';
     sleepHours.value = entry.sleepHours != null ? entry.sleepHours : '';
     blockerNote.value = entry.blockerNote || '';
-    document.querySelectorAll('#tab-log .chips').forEach(function(group){
+    document.querySelectorAll('#tab-log .log-field .chips').forEach(function(group){
       var name = group.getAttribute('data-group');
       Array.prototype.forEach.call(group.querySelectorAll('.chip'), function(c){
         var val = c.getAttribute('data-val');
@@ -717,20 +770,22 @@
       parts.push('бизнес: ' + (e.biz === 'yes' ? 'да' : e.biz === 'no' ? 'нет' : '—'));
       parts.push('дисц.: ' + (e.discipline != null ? e.discipline : '—'));
       parts.push('сон/эн.: ' + (e.sleepHours != null ? e.sleepHours + 'ч' : '—') + '/' + (e.energy != null ? e.energy : '—'));
-      if (e.blocker && e.blocker.length) parts.push('блокер: ' + e.blocker.join(', '));
-      return '<div class="log-entry">' + parts.join(' · ') + '</div>';
+      if (e.blocker && e.blocker.length) parts.push('блокер: ' + e.blocker.map(esc).join(', '));
+      var extra = '';
+      if (e.bizWhat) extra += '<span class="note">Бизнес: ' + esc(e.bizWhat) + '</span>';
+      if (e.blockerNote) extra += '<span class="note">' + esc(e.blockerNote) + '</span>';
+      return '<div class="log-entry">' + parts.join(' · ') + extra + '</div>';
     }).join('');
   }
 
   function renderLogTab(){
-    var data = loadLog();
-    fillLogForm(data[todayISO()]);
+    setLogDate(0);
     renderLogHistory();
   }
 
   saveLogBtn.addEventListener('click', function(){
     var data = loadLog();
-    var today = todayISO();
+    var today = logDate || todayISO();
     data[today] = {
       biz: logSelections.biz,
       bizWhat: bizWhat.value.trim(),
@@ -742,6 +797,7 @@
     };
     saveLog(data);
     logFeedback.textContent = 'Сохранено на ' + today;
+    dateLabel.textContent = 'Запись за ' + today + ' — уже есть, можно править';
     renderLogHistory();
   });
 
