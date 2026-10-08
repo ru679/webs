@@ -15,6 +15,7 @@
     --text: #21281F;
     --text-dim: #6B7264;
     --accent: #B07E22;
+    --accent-bg: #F3E9D2;
     --focus: #2F6FA6;
   }
   @media (prefers-color-scheme: dark) {
@@ -25,6 +26,7 @@
       --text: #EDE8DE;
       --text-dim: #9AA39B;
       --accent: #D8AE55;
+      --accent-bg: #2B2616;
       --focus: #6FA8DC;
     }
   }
@@ -35,6 +37,7 @@
     --text: #EDE8DE;
     --text-dim: #9AA39B;
     --accent: #D8AE55;
+    --accent-bg: #2B2616;
     --focus: #6FA8DC;
   }
 
@@ -44,17 +47,11 @@
     background: var(--bg);
     color: var(--text);
     font-family: 'Work Sans', system-ui, -apple-system, sans-serif;
-    line-height: 1.45;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 28px 20px 60px;
-  }
-  header {
-    margin-bottom: 28px;
-  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 28px 20px 70px; }
+  header { margin-bottom: 26px; }
   header h1 {
     font-family: 'Fraunces', Georgia, serif;
     font-weight: 500;
@@ -62,119 +59,147 @@
     margin: 0 0 4px;
     letter-spacing: -0.01em;
   }
-  header p {
-    margin: 0;
-    color: var(--text-dim);
-    font-size: 14px;
-    max-width: 34ch;
-  }
+  header p { margin: 0; color: var(--text-dim); font-size: 14px; max-width: 36ch; }
 
-  section {
-    padding: 22px 0;
-    border-top: 1px solid var(--line);
-  }
+  section { padding: 24px 0; border-top: 1px solid var(--line); }
   section:first-of-type { border-top: none; padding-top: 0; }
-  section h2 {
-    font-size: 15px;
-    font-weight: 600;
-    margin: 0 0 14px;
-  }
-  section .hint {
-    font-size: 13px;
-    color: var(--text-dim);
-    margin: 6px 0 0;
-  }
+  section h2 { font-size: 15px; font-weight: 600; margin: 0 0 14px; }
+  .hint { font-size: 13px; color: var(--text-dim); margin: 8px 0 0; }
 
-  /* catches counter */
-  .counter-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+  button { font-family: inherit; }
+  .counter-row { display: flex; align-items: center; gap: 10px; }
   .counter-num {
     font-family: 'Fraunces', Georgia, serif;
-    font-size: 34px;
+    font-size: 40px;
     font-weight: 500;
+    line-height: 1;
+    min-width: 2ch;
   }
+  .counter-row .spacer { flex: 1; }
   .tap-btn {
-    padding: 12px 22px;
+    padding: 12px 20px;
     border-radius: 8px;
     border: none;
     background: var(--text);
     color: var(--bg);
-    font-family: inherit;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
   }
+  .tap-btn.accent { background: var(--accent); color: #fff; }
+  :root[data-theme="dark"] .tap-btn.accent { color: #14181B; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tap-btn.accent { color: #14181B; } }
   .tap-btn:active { transform: translateY(1px); }
-  .tap-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-
-  /* tips */
-  .tips {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .tips li {
-    display: flex;
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--line);
-    font-size: 14px;
-  }
-  .tips li:last-of-type { border-bottom: none; }
-  .tips li::before {
-    content: '';
-    flex-shrink: 0;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    margin-top: 8px;
-  }
-
-  /* week grid */
-  .week {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
-    text-align: center;
-  }
-  .week .col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-  }
-  .week .wd {
-    font-size: 11px;
+  .minus-btn {
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
     color: var(--text-dim);
+    font-size: 18px;
+    cursor: pointer;
   }
-  .barwrap {
-    height: 60px;
-    display: flex;
-    align-items: flex-end;
+  button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--focus); outline-offset: 2px;
   }
-  .bar {
-    width: 16px;
-    border-radius: 4px 4px 2px 2px;
-    background: var(--line);
+
+  /* goal */
+  .goal-row { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; font-size: 14px; }
+  .goal-ctrl { display: flex; align-items: center; gap: 8px; }
+  .goal-ctrl button {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; font-size: 16px;
   }
+  .progress { height: 8px; background: var(--line); border-radius: 4px; margin-top: 10px; overflow: hidden; }
+  .progress > div { height: 100%; background: var(--accent); width: 0; transition: width .25s; }
+
+  /* week */
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; margin-top: 22px; }
+  .week .col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .week .wd { font-size: 11px; color: var(--text-dim); }
+  .barwrap { height: 60px; display: flex; align-items: flex-end; }
+  .bar { width: 16px; border-radius: 4px 4px 2px 2px; background: var(--line); }
   .bar.has { background: var(--accent); }
   .bar.today { outline: 1px solid var(--accent); outline-offset: 2px; }
-  .week .ct {
-    font-size: 11px;
-    color: var(--text-dim);
-    min-height: 14px;
+  .bar.dim.has { background: var(--text-dim); }
+  .week .ct { font-size: 11px; color: var(--text-dim); min-height: 14px; }
+
+  /* ladder */
+  .step {
+    display: flex; gap: 12px; width: 100%; text-align: left;
+    padding: 12px; margin-bottom: 8px;
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--surface); color: var(--text); cursor: pointer;
+  }
+  .step.current { background: var(--accent-bg); border-color: var(--accent); }
+  .step .n {
+    flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+    border: 1px solid var(--line); font-size: 12px;
+    display: flex; align-items: center; justify-content: center; color: var(--text-dim);
+  }
+  .step.current .n { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .step b { display: block; font-size: 14px; font-weight: 600; }
+  .step span { display: block; font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+  .task {
+    margin-top: 14px; padding: 14px; border-radius: 8px;
+    background: var(--accent-bg); border: 1px solid var(--accent); font-size: 14px;
+  }
+  .task b { display: block; margin-bottom: 4px; }
+
+  /* log form */
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 4px; }
+  .field input[type="text"], .field select, .field textarea {
+    width: 100%; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text);
+    font-family: inherit; font-size: 14px;
+  }
+  .field textarea { min-height: 64px; resize: vertical; }
+  .fear-row { display: flex; gap: 8px; }
+  .fear-row button {
+    flex: 1; height: 40px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text);
+    font-size: 14px; cursor: pointer;
+  }
+  .fear-row button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  :root[data-theme="dark"] .fear-row button.on { color: #14181B; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .fear-row button.on { color: #14181B; } }
+  .form-msg { font-size: 13px; color: var(--accent); min-height: 18px; margin-top: 8px; }
+
+  .log-item { padding: 12px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .log-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: var(--text-dim); }
+  .log-item p { margin: 4px 0 0; }
+  .log-item .lesson { color: var(--accent); }
+  .log-item button.del { background: none; border: none; color: var(--text-dim); font-size: 18px; cursor: pointer; padding: 0 4px; }
+  .empty { color: var(--text-dim); font-size: 13px; font-style: italic; }
+  .fearchart { display: flex; align-items: flex-end; gap: 6px; height: 56px; margin: 18px 0 4px; }
+  .fearchart div { flex: 1; background: var(--accent); border-radius: 3px 3px 1px 1px; min-width: 6px; }
+
+  /* guide */
+  details { border-top: 1px solid var(--line); }
+  details:last-of-type { border-bottom: 1px solid var(--line); }
+  summary {
+    list-style: none; cursor: pointer; padding: 14px 0;
+    font-size: 15px; font-weight: 600; display: flex; justify-content: space-between; align-items: center;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--text-dim); font-weight: 400; font-size: 20px; }
+  details[open] summary::after { content: '–'; }
+  .gbody { padding: 0 0 16px; font-size: 14px; }
+  .gbody h3 { font-size: 13px; font-weight: 600; margin: 16px 0 6px; color: var(--accent); }
+  .gbody h3:first-child { margin-top: 0; }
+  .gbody p { margin: 0 0 8px; }
+  .gbody ul { margin: 0 0 8px; padding-left: 18px; }
+  .gbody li { margin-bottom: 6px; }
+  .say {
+    margin: 0 0 8px; padding: 8px 12px;
+    border-left: 3px solid var(--accent); background: var(--accent-bg);
+    border-radius: 0 6px 6px 0;
   }
 
   footer {
-    margin-top: 30px;
-    padding-top: 18px;
-    border-top: 1px solid var(--line);
-    font-size: 12px;
-    color: var(--text-dim);
+    margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line);
+    font-size: 12px; color: var(--text-dim);
   }
 </style>
 </head>
@@ -183,123 +208,419 @@
 
   <header>
     <h1>Личный трекер</h1>
+    <p>Только для тебя. Всё хранится в этом браузере и никуда не уходит.</p>
   </header>
 
+  <!-- ПОДХОДЫ -->
+  <section id="sec-approach">
+    <h2>Подошёл сегодня</h2>
+    <div class="counter-row">
+      <div class="counter-num" id="apprNum">0</div>
+      <div class="spacer"></div>
+      <button class="minus-btn" onclick="addCount('approaches', -1)" aria-label="убрать один">−</button>
+      <button class="tap-btn accent" onclick="addCount('approaches', 1)">+1, подошёл</button>
+    </div>
+    <p class="hint">Победа — сам факт, что решился подойти. Номер и результат не считаются. Если пишешь в лог ниже, отдельно жать не нужно: запись засчитается сама.</p>
+
+    <div class="goal-row">
+      <span>Цель на неделю: <b id="goalNum">3</b> · сделано <b id="weekSum">0</b></span>
+      <div class="goal-ctrl">
+        <button onclick="changeGoal(-1)" aria-label="меньше">−</button>
+        <button onclick="changeGoal(1)" aria-label="больше">+</button>
+      </div>
+    </div>
+    <div class="progress"><div id="goalBar"></div></div>
+
+    <div class="week" id="weekAppr"></div>
+  </section>
+
+  <!-- ЛЕСЕНКА -->
+  <section id="sec-ladder">
+    <h2>Лесенка: где я сейчас</h2>
+    <div id="stepList"></div>
+    <div class="task" id="taskBox"></div>
+  </section>
+
+  <!-- ЛОГ -->
+  <section id="sec-log">
+    <h2>Лог подходов</h2>
+    <div class="field">
+      <label for="logWhere">Где</label>
+      <input type="text" id="logWhere" placeholder="например: остановка у универа">
+    </div>
+    <div class="field">
+      <label for="logStep">Ступень</label>
+      <select id="logStep"></select>
+    </div>
+    <div class="field">
+      <label>Насколько было страшно (1 — спокойно, 5 — очень)</label>
+      <div class="fear-row" id="fearRow"></div>
+    </div>
+    <div class="field">
+      <label for="logWhat">Что вышло</label>
+      <textarea id="logWhat" placeholder="одной-двумя фразами"></textarea>
+    </div>
+    <div class="field">
+      <label for="logLesson">Один вывод</label>
+      <input type="text" id="logLesson" placeholder="что сделаю иначе или что сработало">
+    </div>
+    <button class="tap-btn" onclick="addLog()">Записать подход</button>
+    <div class="form-msg" id="formMsg"></div>
+
+    <div id="fearChartBox"></div>
+    <div id="logList"></div>
+  </section>
+
+  <!-- КАК ДЕЛАТЬ -->
+  <section id="sec-guide">
+    <h2>Как это делать</h2>
+
+    <details>
+      <summary>Как начать</summary>
+      <div class="gbody">
+        <h3>Правило 3 секунд</h3>
+        <p>Увидел ситуацию → считаешь «3-2-1» → идёшь. Голова отговаривает в паузе, пока ты стоишь. Если решение принято на ходу, отговаривать уже некому. Прошёл мимо? Не ругай себя, просто бери следующую ситуацию.</p>
+
+        <h3>Живые заходы</h3>
+        <p>Работают вопрос по ситуации, просьба совета и мнение. Комплимент внешности в лоб не работает: он выглядит шаблоном и ставит её в позицию «оценивается». А просьба помочь даёт ей простую и приятную роль.</p>
+        <p><b>Вопрос по ситуации:</b></p>
+        <div class="say">«Извини, не подскажешь, тут есть место, где нормальный кофе, а не сетевая бурда?»</div>
+        <div class="say">«Слушай, этот автобус точно идёт до центра? Я тут первый раз».</div>
+        <div class="say">В очереди или кафе: «А что тут стоит попробовать? Я не знаю, что выбрать».</div>
+        <p><b>Просьба совета</b> (только если ситуация реально такая):</p>
+        <div class="say">В магазине: «Помоги выбрать, какая из двух лучше? Я уже минут пять стою».</div>
+        <div class="say">«Выручи: куда лучше сходить поужинать рядом, чтобы не пожалеть?»</div>
+        <p><b>Мнение</b> (твой заход с мороженым был из этой категории):</p>
+        <div class="say">«Рассуди нас с друзьями: люди вообще едят мороженое осенью или это только мы такие?»</div>
+        <div class="say">«Как думаешь, это место вообще стоит своих денег?»</div>
+
+        <h3>Если спросят «а ты кто?»</h3>
+        <div class="say">«Просто человек, которому нужен был совет 🙂 Меня зовут…»</div>
+        <p>Говори честно и спокойно. Честность убирает напряжение лучше любой отговорки.</p>
+
+        <h3>Когда не подходить</h3>
+        <ul>
+          <li>Наушники в ушах, разговор по телефону, человек явно спешит.</li>
+          <li>Сзади или резко: подходи спереди-сбоку и остановись в паре шагов, не нависай.</li>
+          <li>Видно, что у человека плохой день. Подойди в другой раз, это не трусость.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>Как продолжить разговор</summary>
+      <div class="gbody">
+        <h3>Схема: её слова → вопрос → твоя история</h3>
+        <p>Ухватись за деталь из её ответа, задай вопрос про неё, потом коротко расскажи своё. Вопрос, история, вопрос. Так выходит разговор, а не допрос.</p>
+        <div class="say">Она: «Я тут учусь». Ты: «Серьёзно, на кого? Что там самое сложное?» Потом: «Я пока на первом курсе, половину ещё не понял».</div>
+        <p>Вопросы лучше открытые: «как», «почему», «что». Ответ «да/нет» разговор обрывает.</p>
+
+        <h3>Как не зависать в паузах</h3>
+        <p>Пауза в 2–3 секунды нормальна. Тебе она кажется длиннее, чем ей. Что можно сделать:</p>
+        <ul>
+          <li>Вернись к детали, которую она уже упоминала: «Ты говорила про… расскажи ещё».</li>
+          <li>Прокомментируй, что вокруг: «Тут всегда так людно?»</li>
+          <li>Скажи честно, с лёгкой улыбкой: «Подожди, потерял мысль».</li>
+          <li>Говори чуть медленнее и дыши. Спешка выдаёт нервы.</li>
+        </ul>
+
+        <h3>Как красиво закончить</h3>
+        <p>Заканчивай сам, на хорошей ноте, пока не стало неловко. Формула: благодарность + причина + дверь без давления.</p>
+        <div class="say">«Классно поболтали, мне уже бежать. Если пересечёмся в универе, поздороваюсь».</div>
+        <div class="say">Если разговор шёл взаимно: «Если захочешь ещё пообщаться, вот мой ник, напишешь, когда будет желание».</div>
+        <p>Решение остаётся за ней, и это тебя полностью устраивает.</p>
+
+        <h3>Если контакт не идёт</h3>
+        <p><b>Признаки:</b> короткие ответы, взгляд в сторону или в телефон, шаг назад, нет встречных вопросов.</p>
+        <p><b>Что сказать, чтобы уйти без неловкости:</b></p>
+        <div class="say">«Ладно, не буду отвлекать. Хорошего дня!»</div>
+        <div class="say">«Понял, не мешаю. Спасибо, что ответила».</div>
+        <p>Скажи с улыбкой, без обиды и без оправданий. Уходи сразу, не оглядывайся и не спрашивай «почему».</p>
+        <p><b>Её «нет» или нежелание продолжать не про тебя.</b> Она тебя не знает, у неё свой день, настроение, мысли. Отказ говорит о её моменте, а не оценивает тебя. Твоя часть — быть вежливым и уважительным, остальное не в твоей власти. Вечером запиши в лог страх и один вывод, и хватит.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Парни и связи</summary>
+      <div class="gbody">
+        <p>Тут работает доверие через интерес и пользу, а не через игру. Притворяться заинтересованным не надо: ищи в человеке то, что тебе реально интересно.</p>
+
+        <h3>Как заговорить с человеком, который интересен по делу</h3>
+        <p>Зацепись за конкретное, а не за «давай познакомимся». Один вопрос, из которого видно, что ты слушал или читал.</p>
+        <div class="say">«Слушал твой доклад, особенно зацепило про… Как ты к этому пришёл?»</div>
+        <div class="say">«Увидел твой проект. Как вы решали вопрос с…?»</div>
+
+        <h3>Как предложить пользу</h3>
+        <p>Польза маленькая и без условий. В первом сообщении ничего не проси.</p>
+        <ul>
+          <li>Скинуть полезную статью, ссылку или инструмент по его теме.</li>
+          <li>Познакомить с человеком, который ему пригодится.</li>
+          <li>Посмотреть его сайт или магазин и написать два конкретных замечания.</li>
+          <li>Помочь с мелочью, которую ты реально можешь сделать.</li>
+        </ul>
+        <div class="say">«Нашёл штуку по твоей теме, скинуть?»</div>
+
+        <h3>Как вернуться второй раз</h3>
+        <p>Через 2–5 дней и по поводу, а не «привет, как дела». Напомни, о чём говорили, и дай что-то новое.</p>
+        <div class="say">«Помнишь, ты говорил про…? Я попробовал, вот что вышло. Как у тебя?»</div>
+        <p>Пиши коротко, чтобы можно было ответить одним словом. Не ответил — один мягкий повтор через неделю, дальше отпусти без обиды.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ПЯЛЕНИЕ -->
   <section id="sec-catches">
     <h2>Поймал себя на пялении сегодня</h2>
     <div class="counter-row">
-      <div class="counter-num" id="catchesNum">0</div>
-      <button class="tap-btn" onclick="addCatch()">+1, поймал</button>
+      <div class="counter-num" id="catchNum">0</div>
+      <div class="spacer"></div>
+      <button class="minus-btn" onclick="addCount('catches', -1)" aria-label="убрать один">−</button>
+      <button class="tap-btn" onclick="addCount('catches', 1)">+1, поймал</button>
     </div>
-    <p class="hint">Не для самобичевания — просто чтобы видеть, снижается ли число со временем.</p>
+    <p class="hint">Не для самобичевания, а чтобы видеть, снижается ли число. Сегодняшний счёт обнулится в полночь, история недели остаётся в столбиках.</p>
+    <div class="week" id="weekCatch"></div>
 
-    <div class="week" id="weekGrid" style="margin-top:20px;"></div>
-    <p class="hint">Счётчик выше — только на сегодня, в полночь обнулится. Столбики ниже — история за неделю, она никуда не девается.</p>
+    <details style="margin-top:22px;">
+      <summary>Практика</summary>
+      <div class="gbody">
+        <ul>
+          <li>Взгляд — максимум 1–2 секунды, дальше сознательно переводи глаза на что угодно другое. Бороться с тем, что заметил, не нужно, только с задержкой.</li>
+          <li>Называй момент про себя: «окей, залипаю». Это ломает автоматизм лучше, чем попытка не думать об этом.</li>
+          <li>Если ловишь себя на «каталогизации» (запоминаешь лицо, фигуру), переключай фокус на нейтральную деталь: что несёт, куда идёт.</li>
+          <li>Если сканируешь помещение, тебе скорее всего скучно или тревожно. Переключись на активную задачу: конспект, вопрос, разговор с соседом.</li>
+        </ul>
+      </div>
+    </details>
   </section>
 
-  <section id="sec-tips">
-    <h2>Практика</h2>
-    <ul class="tips">
-      <li>Взгляд — максимум 1–2 секунды, дальше сознательно переводи глаза на что угодно другое. Бороться с тем, что заметил, не нужно — только с задержкой.</li>
-      <li>Называй момент про себя: «окей, залипаю» — это ломает автоматизм лучше, чем попытка не думать об этом.</li>
-      <li>Если ловишь себя на «каталогизации» (запоминаешь лицо, фигуру) — переключай фокус на нейтральную деталь: что несёт, куда идёт.</li>
-      <li>Если поймал себя, что сканируешь помещение — скорее всего, тебе просто скучно или тревожно. Переключись на активную задачу: конспект, вопрос, разговор с соседом.</li>
-    </ul>
-  </section>
-
-  <footer>
-    Данные хранятся локально в этом браузере на этом устройстве.
-  </footer>
-
+  <footer>Данные хранятся локально в этом браузере на этом устройстве.</footer>
 </div>
 
 <script>
   const KEY = 'ru-tracker-v1';
   const WD = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  const STEPS = [
+    { t: 'Взгляд и улыбка', d: 'Встретить взгляд, улыбнуться, не отвести сразу.',
+      task: 'Улыбнись и встреть взгляд у 5 человек за день, любых, не только девушек.' },
+    { t: 'Бытовой вопрос', d: 'Время, дорога, «где тут…».',
+      task: 'Задай 2 бытовых вопроса незнакомым людям. Цель — просто открыть рот и услышать ответ.' },
+    { t: 'Комментарий и открытый вопрос', d: 'Заход по ситуации и вопрос на «как/почему/что».',
+      task: 'Сделай один заход по ситуации и после ответа задай ещё один открытый вопрос.' },
+    { t: 'Разговор 2–3 минуты', d: 'Держать разговор по схеме «слова → вопрос → история».',
+      task: 'Удержи разговор 2–3 минуты с одним человеком, без цели что-то получить.' },
+    { t: 'Закончить и оставить дверь открытой', d: 'Уйти самому на хорошей ноте.',
+      task: 'Заверши разговор сам, пока не стало неловко: благодарность, причина, дверь без давления.' }
+  ];
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
   function localDateStr(d = new Date()) {
-    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
-    return `${y}-${m}-${day}`;
-  }
-
-  function defaultData() {
-    return { days: {} };
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
 
   function load() {
+    let parsed = null;
     try {
       const raw = localStorage.getItem(KEY);
-      if (!raw) return defaultData();
-      const parsed = JSON.parse(raw);
-      if (!parsed.days) parsed.days = {};
-      return parsed;
-    } catch (e) {
-      console.error('load failed', e);
-      return defaultData();
-    }
+      if (raw) parsed = JSON.parse(raw);
+    } catch (e) { console.error('load failed', e); }
+    if (!parsed || typeof parsed !== 'object') parsed = {};
+    if (!parsed.days || typeof parsed.days !== 'object') parsed.days = {};
+    if (!Array.isArray(parsed.log)) parsed.log = [];
+    if (!parsed.step || parsed.step < 1 || parsed.step > STEPS.length) parsed.step = 1;
+    if (!parsed.goal || parsed.goal < 1) parsed.goal = 3;
+    return parsed;
   }
 
   function save() {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(state));
-    } catch (e) {
-      console.error('save failed', e);
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch (e) { console.error('save failed', e); }
+  }
+
+  function getDay(key) {
+    if (!state.days[key]) state.days[key] = { catches: 0, approaches: 0 };
+    const r = state.days[key];
+    if (typeof r.catches !== 'number') r.catches = 0;
+    if (typeof r.approaches !== 'number') r.approaches = 0;
+    return r;
+  }
+
+  function addCount(field, delta) {
+    const rec = getDay(localDateStr());
+    rec[field] = Math.max(0, rec[field] + delta);
+    save(); render();
+  }
+
+  function changeGoal(delta) {
+    state.goal = Math.max(1, Math.min(21, state.goal + delta));
+    save(); render();
+  }
+
+  function setStep(n) {
+    state.step = n;
+    $('logStep').value = String(n);
+    save(); render();
+  }
+
+  let fearSel = 0;
+  function setFear(n) { fearSel = n; renderFear(); }
+  function renderFear() {
+    const row = $('fearRow');
+    row.innerHTML = '';
+    for (let i = 1; i <= 5; i++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = i;
+      if (i === fearSel) b.className = 'on';
+      b.addEventListener('click', () => setFear(i));
+      row.appendChild(b);
     }
   }
 
-  function getDay(dateStr) {
-    if (!state.days[dateStr]) {
-      state.days[dateStr] = { catches: 0 };
-    }
-    return state.days[dateStr];
-  }
-
-  function addCatch() {
+  function addLog() {
+    const msg = $('formMsg');
+    if (!fearSel) { msg.textContent = 'Выбери, насколько было страшно (1–5).'; return; }
     const key = localDateStr();
-    const rec = getDay(key);
-    rec.catches += 1;
-    save();
-    render();
+    state.log.unshift({
+      id: Date.now(),
+      date: key,
+      step: parseInt($('logStep').value, 10) || 1,
+      fear: fearSel,
+      where: $('logWhere').value.trim(),
+      what: $('logWhat').value.trim(),
+      lesson: $('logLesson').value.trim()
+    });
+    getDay(key).approaches += 1;
+    $('logWhere').value = '';
+    $('logWhat').value = '';
+    $('logLesson').value = '';
+    fearSel = 0;
+    msg.textContent = 'Записано. Подход засчитан.';
+    save(); renderFear(); render();
   }
 
-  function render() {
-    const todayKey = localDateStr();
-    const todayRec = getDay(todayKey);
+  function delLog(id) {
+    const e = state.log.find(x => x.id === id);
+    if (!e) return;
+    if (!confirm('Удалить запись? Подход тоже снимется со счётчика.')) return;
+    state.log = state.log.filter(x => x.id !== id);
+    const d = state.days[e.date];
+    if (d && d.approaches > 0) d.approaches -= 1;
+    save(); render();
+  }
 
-    document.getElementById('catchesNum').textContent = todayRec.catches;
-
-    const weekGrid = document.getElementById('weekGrid');
-    weekGrid.innerHTML = '';
+  function weekDates() {
     const now = new Date();
-    const jsDay = now.getDay(); // 0=Sun..6=Sat
-    const mondayOffset = jsDay === 0 ? -6 : 1 - jsDay;
+    const jsDay = now.getDay();
     const monday = new Date(now);
-    monday.setDate(now.getDate() + mondayOffset);
-
+    monday.setDate(now.getDate() + (jsDay === 0 ? -6 : 1 - jsDay));
+    const out = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
-      const key = localDateStr(d);
+      out.push(localDateStr(d));
+    }
+    return out;
+  }
+
+  function renderWeek(containerId, field, step, cap, dim) {
+    const box = $(containerId);
+    box.innerHTML = '';
+    const today = localDateStr();
+    weekDates().forEach((key, i) => {
       const rec = state.days[key];
-      const catches = rec ? rec.catches : 0;
-      const isToday = key === todayKey;
-      const barHeight = catches === 0 ? 4 : Math.min(8, catches) * 7 + 4;
-      let barClass = 'bar';
-      if (catches > 0) barClass += ' has';
-      if (isToday) barClass += ' today';
+      const n = rec && typeof rec[field] === 'number' ? rec[field] : 0;
+      const h = n === 0 ? 4 : Math.min(cap, n) * step + 4;
+      let cls = 'bar' + (dim ? ' dim' : '');
+      if (n > 0) cls += ' has';
+      if (key === today) cls += ' today';
       const col = document.createElement('div');
       col.className = 'col';
-      col.innerHTML = `
-        <div class="wd">${WD[i]}</div>
-        <div class="barwrap"><div class="${barClass}" style="height:${barHeight}px"></div></div>
-        <div class="ct">${catches || ''}</div>
-      `;
-      weekGrid.appendChild(col);
+      col.innerHTML = '<div class="wd">' + WD[i] + '</div>' +
+        '<div class="barwrap"><div class="' + cls + '" style="height:' + h + 'px"></div></div>' +
+        '<div class="ct">' + (n || '') + '</div>';
+      box.appendChild(col);
+    });
+  }
+
+  function fmtDate(key) {
+    const p = key.split('-');
+    return p[2] + '.' + p[1];
+  }
+
+  function render() {
+    const today = getDay(localDateStr());
+    $('apprNum').textContent = today.approaches;
+    $('catchNum').textContent = today.catches;
+
+    // goal
+    const sum = weekDates().reduce((acc, k) => acc + ((state.days[k] && state.days[k].approaches) || 0), 0);
+    $('goalNum').textContent = state.goal;
+    $('weekSum').textContent = sum;
+    $('goalBar').style.width = Math.min(100, Math.round(sum / state.goal * 100)) + '%';
+
+    renderWeek('weekAppr', 'approaches', 9, 6, false);
+    renderWeek('weekCatch', 'catches', 7, 8, true);
+
+    // ladder
+    const list = $('stepList');
+    list.innerHTML = '';
+    STEPS.forEach((s, i) => {
+      const n = i + 1;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'step' + (n === state.step ? ' current' : '');
+      b.innerHTML = '<div class="n">' + n + '</div><div><b>' + esc(s.t) + '</b><span>' + esc(s.d) + '</span></div>';
+      b.addEventListener('click', () => setStep(n));
+      list.appendChild(b);
+    });
+    $('taskBox').innerHTML = '<b>Задание на сегодня</b>' + esc(STEPS[state.step - 1].task);
+
+    // log
+    const logBox = $('logList');
+    logBox.innerHTML = '';
+    if (state.log.length === 0) {
+      logBox.innerHTML = '<p class="empty" style="margin-top:18px;">Пока пусто. Первая запись появится после первого подхода.</p>';
+    } else {
+      state.log.forEach(e => {
+        const item = document.createElement('div');
+        item.className = 'log-item';
+        item.innerHTML =
+          '<div class="log-top"><span>' + fmtDate(e.date) + ' · ступень ' + e.step + ' · страх ' + e.fear + '/5' +
+          (e.where ? ' · ' + esc(e.where) : '') + '</span><button class="del" aria-label="удалить">×</button></div>' +
+          (e.what ? '<p>' + esc(e.what) + '</p>' : '') +
+          (e.lesson ? '<p class="lesson">→ ' + esc(e.lesson) + '</p>' : '');
+        item.querySelector('.del').addEventListener('click', () => delLog(e.id));
+        logBox.appendChild(item);
+      });
+    }
+
+    // fear chart
+    const chartBox = $('fearChartBox');
+    if (state.log.length >= 2) {
+      const last = state.log.slice(0, 10).reverse();
+      chartBox.innerHTML = '<div class="fearchart">' +
+        last.map(e => '<div style="height:' + (e.fear * 10 + 6) + 'px"></div>').join('') +
+        '</div><p class="hint" style="margin:0 0 14px;">Страх в последних подходах (слева старые, справа новые). Хорошо, если столбики со временем ниже.</p>';
+    } else {
+      chartBox.innerHTML = '';
     }
   }
 
-  let state = load();
-  render();
+  const state = load();
+  (function init() {
+    const sel = $('logStep');
+    STEPS.forEach((s, i) => {
+      const o = document.createElement('option');
+      o.value = String(i + 1);
+      o.textContent = (i + 1) + '. ' + s.t;
+      sel.appendChild(o);
+    });
+    sel.value = String(state.step);
+    renderFear();
+    render();
+  })();
 </script>
 </body>
 </html>
